@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f7f6; display: flex; height: 100vh; }
+        .welcome-section { flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; flex-direction: column; justify-content: center; padding: 60px; }
+        .welcome-section h1 { font-size: 3.5rem; margin-bottom: 20px; }
+        .login-section { width: 450px; background: white; display: flex; flex-direction: column; justify-content: center; padding: 60px; box-shadow: -5px 0 25px rgba(0,0,0,0.05); }
+        .login-box h2 { margin-bottom: 30px; color: #333; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #666; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        .btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #5a72e2; }
+        .error { color: #e74c3c; margin-bottom: 15px; font-size: 0.9rem; }
+        .hint { margin-top: 30px; background: #eee; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="welcome-section">
+        <h1>Добро пожаловать в систему!</h1>
+        <p>Авторизуйтесь, чтобы получить доступ к своему личному кабинету и возможностям платформы.</p>
+    </div>
+    <div class="login-section">
+        <div class="login-box">
+            <h2>Войти в аккаунт</h2>
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+            <form action="/login" method="POST">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required placeholder="example@test.com">
+                </div>
+                <div class="input-group">
+                    <label>Пароль</label>
+                    <input type="password" name="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn">Войти</button>
+            </form>
+            <div class="hint">
+                <strong>Данные для теста:</strong><br>
+                Клиент: user@test.com / 456<br>
+                Админ: admin@test.com / 123
+            </div>
+        </div>
+    </div>
+</body>
+</html>
