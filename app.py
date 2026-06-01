@@ -1,43 +1,90 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+import sqlite3
+import os
 
 app = Flask(__name__)
-# Секретный ключ нужен для работы сессий (чтобы сайт "помнил" вошедшего пользователя)
 app.secret_key = 'super-secret-key-change-me-later'
 
-# Симуляция базы данных (пока храним пользователей прямо в памяти сервера)
-# Пароли в реальных проектах всегда шифруют, но для теста пишем текстом
-USERS = {
-    "admin@test.com": {"password": "123", "role": "admin", "name": "Администратор"},
-    "user@test.com": {"password": "456", "role": "client", "name": "Иван Иванов"}
-}
+DB_FILE = 'database.db'
+
+def init_db():
+    """Функция для создания базы данных и таблицы пользователей при запуске"""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL
+        )
+    ''')
+    
+    # Создаем тестового админа, если таблицы были пустыми
+    cursor.execute("SELECT * FROM users WHERE email='admin@test.com'")
+    if not cursor.fetchone():
+        cursor.execute(
+            "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+            ("Главный Админ", "admin@test.com", "123", "admin")
+        )
+    conn.commit()
+    conn.close()
+
+# Запускаем создание базы данных
+init_db()
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, role, password FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+    
+    if user and user[2] == password:
+        session['user'] = email
+        session['name'] = user[0]
+        session['role'] = user[1]
+        
+        if user[1] == 'admin':
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return redirect(url_for('client_dashboard'))
+    
+    return render_template('index.html', error="Неверный логин или пароль")
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
     if request.method == 'POST':
+        name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
         
-        # Проверяем, есть ли пользователь в нашей "базе данных"
-        user = USERS.get(email)
-        if user and user['password'] == password:
-            # Записываем пользователя в сессию
-            session['user'] = email
-            session['role'] = user['role']
-            session['name'] = user['name']
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        
+        try:
+            # Все новые пользователи по умолчанию получают роль 'client'
+            cursor.execute(
+                "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+                (name, email, password, 'client')
+            )
+            conn.commit()
+            conn.close()
+            return render_template('index.html', message="Регистрация успешна! Теперь вооидите.")
+        except sqlite3.IntegrityError:
+            conn.close()
+            return render_template('register.html', error="Пользователь с таким Email уже существует")
             
-            # Перенаправляем в зависимости от роли
-            if user['role'] == 'admin':
-                return redirect(url_for('admin_dashboard'))
-            else:
-                return redirect(url_for('client_dashboard'))
-        else:
-            return render_template('index.html', error="Неверный логин или пароль")
-            
-    return redirect(url_for('home'))
+    return render_template('register.html')
 
 @app.route('/client')
 def client_dashboard():
@@ -48,7 +95,13 @@ def client_dashboard():
 @app.route('/admin')
 def admin_dashboard():
     if 'user' in session and session['role'] == 'admin':
-        return render_template('admin.html', name=session['name'])
+        # Вытащим из базы список всех пользователей, чтобы админ их видел
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, email, role FROM users")
+        all_users = cursor.fetchall()
+        conn.close()
+        return render_template('admin.html', name=session['name'], users=all_users)
     return redirect(url_for('home'))
 
 @app.route('/logout')
