@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора</title>
+    <style>
+        body { font-family: sans-serif; background: #2c3e50; color: white; padding: 50px; }
+        .panel { background: #34495e; padding: 40px; border-radius: 12px; max-width: 800px; margin: 0 auto; }
+        h1 { color: #1abc9c; }
+        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .menu-item { background: #16a085; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; }
+        .logout { display: inline-block; margin-top: 20px; color: #fc5c65; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <h1>⚙️ Панель управления (Администратор)</h1>
+        <p>Приветствуем, глава сайта <strong>{{ name }}</strong>!</p>
+        
+        <div class="menu">
+            <div class="menu-item">👥 Управление аккаунтами</div>
+            <div class="menu-item">💬 Переписка с клиентами</div>
+            <div class="menu-item">📊 Статистика сайта</div>
+            <div class="menu-item">🛠️ Настройки системы</div>
+        </div>
+        
+        <a href="/logout" class="logout">Выйти из панели</a>
+    </div>
+</body>
+</html>
