@@ -3,56 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная страница</title>
+    <title>ПромГидравлика — Производство и поставка РВД</title>
     <style>
+        /* Общие стили */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f4f7f6; display: flex; height: 100vh; }
-        .welcome-section { flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; flex-direction: column; justify-content: center; padding: 60px; }
-        .welcome-section h1 { font-size: 3.5rem; margin-bottom: 20px; }
-        .login-section { width: 450px; background: white; display: flex; flex-direction: column; justify-content: center; padding: 60px; box-shadow: -5px 0 25px rgba(0,0,0,0.05); }
-        .login-box h2 { margin-bottom: 30px; color: #333; }
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; color: #666; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
-        .btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
-        .btn:hover { background: #5a72e2; }
-        .error { color: #e74c3c; margin-bottom: 15px; font-size: 0.9rem; }
-        .message { color: #2ecc71; margin-bottom: 15px; font-size: 0.9rem; }
-        .reg-link { text-align: center; font-size: 0.9rem; color: #667eea; text-decoration: none; display: block; }
-        .hint { margin-top: 30px; background: #eee; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #555; }
+        body { background: #f8fafc; color: #334155; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* Шапка сайта (Header) */
+        header { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; height: 80px; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: #3b82f6; }
+        nav { display: flex; gap: 30px; font-weight: 500; }
+        nav a:hover { color: #3b82f6; transition: 0.2s; }
+        .header-contacts { text-align: right; font-size: 0.9rem; }
+        .phone { font-weight: 700; color: #0f172a; font-size: 1.05rem; }
+        
+        /* Кнопка ЛК в шапке */
+        .btn-lk { background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; transition: 0.3s; }
+        .btn-lk:hover { background: #2563eb; }
+
+        /* Главный баннер (Hero Section) */
+        .hero { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 100px 0; position: relative; overflow: hidden; }
+        .hero-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+        .hero-text { max-width: 600px; }
+        .hero-text h1 { font-size: 3rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px; }
+        .hero-text p { font-size: 1.2rem; color: #94a3b8; margin-bottom: 30px; }
+        
+        /* Форма авторизации прямо на главном баннере */
+        .hero-form-box { background: white; color: #334155; padding: 35px; border-radius: 12px; width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .hero-form-box h3 { font-size: 1.4rem; margin-bottom: 20px; color: #0f172a; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #64748b; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; }
+        .btn-submit { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 15px; transition: 0.3s; }
+        .btn-submit:hover { background: #2563eb; }
+        .reg-link { display: block; text-align: center; color: #3b82f6; font-size: 0.9rem; font-weight: 500; }
+        .error { color: #ef4444; margin-bottom: 15px; font-size: 0.9rem; }
+        .message { color: #10b981; margin-bottom: 15px; font-size: 0.9rem; }
+
+        /* Блок преимуществ */
+        .features { padding: 80px 0; background: white; }
+        .section-title { text-align: center; font-size: 2rem; font-weight: 700; color: #0f172a; margin-bottom: 50px; }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .feature-card { background: #f8fafc; padding: 30px; border-radius: 8px; border-left: 4px solid #3b82f6; }
+        .feature-card h4 { font-size: 1.2rem; color: #0f172a; margin-bottom: 10px; }
+        .feature-card p { color: #64748b; font-size: 0.95rem; line-height: 1.5; }
+
+        /* Блок продукции (Каталог) */
+        .products { padding: 80px 0; }
+        .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .product-img { height: 180px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-weight: 700; }
+        .product-info { padding: 20px; }
+        .product-info h5 { font-size: 1.1rem; color: #0f172a; margin-bottom: 10px; }
+        .product-info p { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; }
+        .btn-buy { display: block; text-align: center; background: #f1f5f9; color: #0f172a; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
+        .btn-buy:hover { background: #3b82f6; color: white; transition: 0.2s; }
+
+        /* Подвал сайта (Footer) */
+        footer { background: #0f172a; color: #64748b; padding: 40px 0; font-size: 0.9rem; border-top: 1px solid #1e293b; }
+        .footer-inner { display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
-    <div class="welcome-section">
-        <h1>Добро пожаловать в систему!</h1>
-        <p>Авторизуйтесь, чтобы получить доступ к своему личному кабинету и возможностям платформы.</p>
-    </div>
-    <div class="login-section">
-        <div class="login-box">
-            <h2>Войти в аккаунт</h2>
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
-            {% if message %}
-                <div class="message">{{ message }}</div>
-            {% endif %}
-            <form action="/login" method="POST">
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" name="email" required placeholder="example@test.com">
-                </div>
-                <div class="input-group">
-                    <label>Пароль</label>
-                    <input type="password" name="password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn">Войти</button>
-            </form>
-            <a href="/register" class="reg-link">Нет аккаунта? Зарегистрироваться</a>
-            <div class="hint">
-                <strong>Данные администратора:</strong><br>
-                admin@test.com / 123
+
+    <header>
+        <div class="container header-inner">
+            <div class="logo">⚙️ ПРОМ<span>ГИДРАВЛИКА</span></div>
+            <nav>
+                <a href="#">Главная</a>
+                <a href="#">Каталог</a>
+                <a href="#">О компании</a>
+                <a href="#">Контакты</a>
+            </nav>
+            <div class="header-contacts">
+                <div class="phone">+7 (777) 123-4567</div>
+                <div>г. Астана, ул. Промышленная, 1А</div>
+            </div>
+            <a href="#login-form" class="btn-lk">Личный кабинет</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-inner">
+            <div class="hero-text">
+                <h1>Рукава высокого давления (РВД) в Казахстане</h1>
+                <p>Проектирование, производство и оптовые поставки гидравлических шлангов, фитингов и промышленного оборудования. Гарантия качества по стандарту ISO 9001.</p>
+            </div>
+            
+            <div class="hero-form-box" id="login-form">
+                <h3>Вход в систему</h3>
+                {% if error %}
+                    <div class="error">{{ error }}</div>
+                {% endif %}
+                {% if message %}
+                    <div class="message">{{ message }}</div>
+                {% endif %}
+                <form action="/login" method="POST">
+                    <div class="input-group">
+                        <label>Ваш Email</label>
+                        <input type="email" name="email" required placeholder="example@test.com">
+                    </div>
+                    <div class="input-group">
+                        <label>Пароль</label>
+                        <input type="password" name="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-submit">Войти</button>
+                </form>
+                <a href="/register" class="reg-link">Создать личный кабинет клиента</a>
             </div>
         </div>
-    </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <div class="section-title">Почему выбирают нас</div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h4>Собственное производство</h4>
+                    <p>Изготовление РВД любой сложности по вашим чертежам на европейском оборудовании за 15 минут.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>3000+ позиций на складе</h4>
+                    <p>Постоянное наличие муфт, фитингов, адаптеров и шлангов для любых видов спецтехники.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Доставка по всему СНГ</h4>
+                    <p>Быстрая отгрузка заказов из Астаны в любой регион Казахстана и стран ближнего зарубежья.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="products">
+        <div class="container">
+            <div class="section-title">Наша продукция</div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-img">РВД Шланги</div>
+                    <div class="product-info">
+                        <h5>Рукава 1SN / 2SN</h5>
+                        <p>Стандартные гидравлические рукава с одной и двумя оплетками.</p>
+                        <a href="/register" class="btn-buy">Заказать</a>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">Фитинги</div>
+                    <div class="product-info">
+                        <h5>Фитинги DKOL / DKOS</h5>
+                        <p>Метрическая арматура высокого давления для техники.</p>
+                        <a href="/register" class="btn-buy">Заказать</a>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">Оборудование</div>
+                    <div class="product-info">
+                        <h5>Обжимные станки</h5>
+                        <p>Пресса для сборки и опрессовки РВД шлангов в цеху.</p>
+                        <a href="/register" class="btn-buy">Заказать</a>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">Защита</div>
+                    <div class="product-info">
+                        <h5>Пластиковая спираль</h5>
+                        <p>Защита шлангов от механического износа и трения.</p>
+                        <a href="/register" class="btn-buy">Заказать</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-inner">
+            <div>© 2026 ТОО ПромГидравлика. Все права защищены.</div>
+            <div>Разработка сайта на Python + Flask</div>
+        </div>
+    </footer>
+
 </body>
 </html>
