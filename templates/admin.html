@@ -4,12 +4,22 @@
     <meta charset="UTF-8">
     <title>Панель администратора</title>
     <style>
-        body { font-family: sans-serif; background: #2c3e50; color: white; padding: 50px; }
-        .panel { background: #34495e; padding: 40px; border-radius: 12px; max-width: 800px; margin: 0 auto; }
-        h1 { color: #1abc9c; }
-        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-        .menu-item { background: #16a085; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; }
-        .logout { display: inline-block; margin-top: 20px; color: #fc5c65; text-decoration: none; }
+        body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; color: white; padding: 40px; }
+        .panel { background: #34495e; padding: 40px; border-radius: 12px; max-width: 900px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h1 { color: #1abc9c; margin-bottom: 10px; }
+        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; margin-bottom: 40px; }
+        .menu-item { background: #16a085; padding: 20px; border-radius: 8px; text-align: center; font-weight: bold; }
+        
+        h3 { color: #ecf0f1; margin-bottom: 15px; border-bottom: 2px solid #1abc9c; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; background: #2c3e50; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; }
+        th { background-color: #2980b9; color: white; }
+        tr:nth-child(even) { background-color: #34495e; }
+        tr:hover { background-color: #415b76; }
+        .role-badge { background: #e67e22; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem; }
+        .role-badge.admin { background: #e74c3c; }
+
+        .logout { display: inline-block; margin-top: 30px; color: #fc5c65; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -18,11 +28,31 @@
         <p>Приветствуем, глава сайта <strong>{{ name }}</strong>!</p>
         
         <div class="menu">
-            <div class="menu-item">👥 Управление аккаунтами</div>
-            <div class="menu-item">💬 Переписка с клиентами</div>
-            <div class="menu-item">📊 Статистика сайта</div>
-            <div class="menu-item">🛠️ Настройки системы</div>
+            <div class="menu-item">💬 Чат с клиентами (В разработке)</div>
+            <div class="menu-item">📊 Статистика сайта (В разработке)</div>
         </div>
+
+        <h3>👥 Список зарегистрированных пользователей в базе данных:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Email</th>
+                    <th>Роль</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user[0] }}</td>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
+                    <td><span class="role-badge {% if user[3] == 'admin' %}admin{% endif %}">{{ user[3] }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         
         <a href="/logout" class="logout">Выйти из панели</a>
     </div>
