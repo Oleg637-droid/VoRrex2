@@ -14,9 +14,11 @@
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; color: #666; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
-        .btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.3s; }
+        .btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
         .btn:hover { background: #5a72e2; }
         .error { color: #e74c3c; margin-bottom: 15px; font-size: 0.9rem; }
+        .message { color: #2ecc71; margin-bottom: 15px; font-size: 0.9rem; }
+        .reg-link { text-align: center; font-size: 0.9rem; color: #667eea; text-decoration: none; display: block; }
         .hint { margin-top: 30px; background: #eee; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #555; }
     </style>
 </head>
@@ -31,6 +33,9 @@
             {% if error %}
                 <div class="error">{{ error }}</div>
             {% endif %}
+            {% if message %}
+                <div class="message">{{ message }}</div>
+            {% endif %}
             <form action="/login" method="POST">
                 <div class="input-group">
                     <label>Email</label>
@@ -42,10 +47,10 @@
                 </div>
                 <button type="submit" class="btn">Войти</button>
             </form>
+            <a href="/register" class="reg-link">Нет аккаунта? Зарегистрироваться</a>
             <div class="hint">
-                <strong>Данные для теста:</strong><br>
-                Клиент: user@test.com / 456<br>
-                Админ: admin@test.com / 123
+                <strong>Данные администратора:</strong><br>
+                admin@test.com / 123
             </div>
         </div>
     </div>
