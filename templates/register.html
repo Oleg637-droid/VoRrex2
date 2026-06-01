@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .reg-box { width: 400px; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { margin-bottom: 25px; color: #333; text-align: center; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #666; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        .btn { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
+        .btn:hover { background: #27ae60; }
+        .error { color: #e74c3c; margin-bottom: 15px; font-size: 0.9rem; text-align: center; }
+        .login-link { text-align: center; font-size: 0.9rem; color: #667eea; text-decoration: none; display: block; }
+    </style>
+</head>
+<body>
+    <div class="reg-box">
+        <h2>Регистрация нового клиента</h2>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form action="/register" method="POST">
+            <div class="input-group">
+                <label>Имя</label>
+                <input type="text" name="name" required placeholder="Иван Петров">
+            </div>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="ivan@example.com">
+            </div>
+            <div class="input-group">
+                <label>Пароль</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn">Создать аккаунт</button>
+        </form>
+        <a href="/" class="login-link">Уже есть аккаунт? Войти</a>
+    </div>
+</body>
+</html>
