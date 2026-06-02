@@ -34,6 +34,10 @@ init_db()
 def home():
     return render_template('index.html')
 
+@app.route('/contacts')
+def contacts():
+    return render_template('contacts.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     email = request.form.get('email')
