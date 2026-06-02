@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
-import os
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key-change-me-later'
@@ -8,7 +7,6 @@ app.secret_key = 'super-secret-key-change-me-later'
 DB_FILE = 'database.db'
 
 def init_db():
-    """Функция для создания базы данных и таблицы пользователей при запуске"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('''
@@ -21,7 +19,6 @@ def init_db():
         )
     ''')
     
-    # Создаем тестового админа, если таблицы были пустыми
     cursor.execute("SELECT * FROM users WHERE email='admin@test.com'")
     if not cursor.fetchone():
         cursor.execute(
@@ -31,7 +28,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Запускаем создание базы данных
 init_db()
 
 @app.route('/')
@@ -72,14 +68,13 @@ def register():
         cursor = conn.cursor()
         
         try:
-            # Все новые пользователи по умолчанию получают роль 'client'
             cursor.execute(
                 "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
                 (name, email, password, 'client')
             )
             conn.commit()
             conn.close()
-            return render_template('index.html', message="Регистрация успешна! Теперь вооидите.")
+            return render_template('index.html', message="Регистрация успешна! Теперь войдите.")
         except sqlite3.IntegrityError:
             conn.close()
             return render_template('register.html', error="Пользователь с таким Email уже существует")
@@ -95,7 +90,6 @@ def client_dashboard():
 @app.route('/admin')
 def admin_dashboard():
     if 'user' in session and session['role'] == 'admin':
-        # Вытащим из базы список всех пользователей, чтобы админ их видел
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
         cursor.execute("SELECT id, name, email, role FROM users")
@@ -103,6 +97,36 @@ def admin_dashboard():
         conn.close()
         return render_template('admin.html', name=session['name'], users=all_users)
     return redirect(url_for('home'))
+
+# --- НОВЫЕ ФУНКЦИИ ДЛЯ АДМИНА ---
+
+@app.route('/admin/delete/<int:user_id>')
+def delete_user(user_id):
+    # Проверяем, что это точно админ
+    if 'user' in session and session['role'] == 'admin':
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        # Удаляем пользователя по его ID
+        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+        conn.close()
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/toggle_role/<int:user_id>')
+def toggle_role(user_id):
+    if 'user' in session and session['role'] == 'admin':
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT role FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        
+        if user:
+            # Если был клиентом -> станет админом, и наоборот
+            new_role = 'admin' if user[0] == 'client' else 'client'
+            cursor.execute("UPDATE users SET role = ? WHERE id = ?", (new_role, user_id))
+            conn.commit()
+        conn.close()
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/logout')
 def logout():
