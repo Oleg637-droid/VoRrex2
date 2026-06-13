@@ -2,8 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Панель администратора</title>
+    <title>Панель администратора — VoRtex</title>
     <style>
+        /* Оригинальные стили панели */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; color: white; padding: 40px; }
         .panel { background: #34495e; padding: 40px; border-radius: 12px; max-width: 1000px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         h1 { color: #1abc9c; margin-bottom: 10px; }
@@ -20,18 +22,28 @@
         .role-badge { background: #e67e22; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
         .role-badge.admin { background: #e74c3c; }
 
-        /* Стили для кнопок управления */
-        .btn-action { display: inline-block; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; text-decoration: none; font-weight: 600; margin-right: 5px; transition: 0.2s; }
+        /* Оптимизированные стили для тегов form и button управления */
+        .action-form { display: inline-block; margin-right: 5px; }
+        .btn-action { display: inline-block; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
         .btn-role { background: #f1c40f; color: #2c3e50; }
         .btn-role:hover { background: #f39c12; }
         .btn-delete { background: #e74c3c; color: white; }
         .btn-delete:hover { background: #c0392b; }
 
+        /* Навигационные ссылки */
+        .nav-links { margin-bottom: 20px; font-size: 0.95rem; }
+        .nav-links a { color: #1abc9c; text-decoration: none; margin-right: 15px; font-weight: 600; }
+        .nav-links a:hover { text-decoration: underline; }
         .logout { display: inline-block; margin-top: 30px; color: #fc5c65; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="panel">
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">← На главную</a>
+            <a href="{{ url_for('contacts') }}">Контакты</a>
+        </div>
+
         <h1>⚙️ Панель управления (Администратор)</h1>
         <p>Приветствуем, глава сайта <strong>{{ name }}</strong>!</p>
         
@@ -60,8 +72,13 @@
                     <td><span class="role-badge {% if user[3] == 'admin' %}admin{% endif %}">{{ user[3] }}</span></td>
                     <td>
                         {% if user[2] != 'admin@test.com' %}
-                            <a href="/admin/toggle_role/{{ user[0] }}" class="btn-action btn-role">Сменить роль</a>
-                            <a href="/admin/delete/{{ user[0] }}" class="btn-action btn-delete" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?')">Удалить</a>
+                            <form action="{{ url_for('toggle_role', user_id=user[0]) }}" method="POST" class="action-form">
+                                <button type="submit" class="btn-action btn-role">Сменить роль</button>
+                            </form>
+
+                            <form action="{{ url_for('delete_user', user_id=user[0]) }}" method="POST" class="action-form" onsubmit="return confirm('Вы уверены, что хотите удалить этого пользователя?')">
+                                <button type="submit" class="btn-action btn-delete">Удалить</button>
+                            </form>
                         {% else %}
                             <span style="color: #95a5a6; font-style: italic;">Основной аккаунт</span>
                         {% endif %}
@@ -71,7 +88,7 @@
             </tbody>
         </table>
         
-        <a href="/logout" class="logout">Выйти из панели</a>
+        <a href="{{ url_for('logout') }}" class="logout">Выйти из панели</a>
     </div>
 </body>
 </html>
