@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация</title>
+    <title>Регистрация — VoRtex</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; }
@@ -24,7 +24,8 @@
         {% if error %}
             <div class="error">{{ error }}</div>
         {% endif %}
-        <form action="/register" method="POST">
+        
+        <form action="{{ url_for('register') }}" method="POST">
             <div class="input-group">
                 <label>Имя</label>
                 <input type="text" name="name" required placeholder="Иван Петров">
@@ -39,7 +40,8 @@
             </div>
             <button type="submit" class="btn">Создать аккаунт</button>
         </form>
-        <a href="/" class="login-link">Уже есть аккаунт? Войти</a>
+        
+        <a href="{{ url_for('home') }}" class="login-link">Уже есть аккаунт? Войти</a>
     </div>
 </body>
 </html>
