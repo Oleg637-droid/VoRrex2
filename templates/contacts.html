@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Контакты — ПромГидравлика</title>
+    <title>Контакты — VoRtex ГИДРАВЛИК</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: #f8fafc; color: #334155; display: flex; flex-direction: column; min-height: 100vh; }
@@ -19,7 +19,12 @@
         nav a:hover, nav a.active { color: #3b82f6; transition: 0.2s; }
         .header-contacts { text-align: right; font-size: 0.9rem; }
         .phone { font-weight: 700; color: #0f172a; font-size: 1.05rem; }
-        .btn-lk { background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; }
+        
+        /* Кнопки ЛК и Выхода */
+        .btn-lk { background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; transition: 0.3s; }
+        .btn-lk:hover { background: #2563eb; }
+        .btn-logout { background: #ef4444; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; transition: 0.3s; margin-left: 10px; }
+        .btn-logout:hover { background: #dc2626; }
 
         /* Контент страницы контактов */
         .contacts-section { flex: 1; padding: 60px 0; }
@@ -30,6 +35,7 @@
         
         /* Левая колонка: Информация */
         .info-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .info-card br { margin-bottom: 8px; }
         .info-item { margin-bottom: 30px; }
         .info-item h3 { font-size: 1.2rem; color: #0f172a; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
         .info-item p { color: #64748b; line-height: 1.6; }
@@ -45,50 +51,58 @@
         .btn-send:hover { background: #1e293b; }
 
         /* Подвал */
-        footer { background: #0f172a; color: #64748b; padding: 40px 0; font-size: 0.9rem; margin-top: auto; }
+        footer { background: #0f172a; color: #64748b; padding: 40px 0; font-size: 0.9rem; margin-top: auto; border-top: 1px solid #1e293b; }
         .footer-inner { display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-    <!-- Шапка -->
     <header>
         <div class="container header-inner">
-            <div class="logo">⚙️ ПРОМ<span>ГИДРАВЛИКА</span></div>
+            <div class="logo">⚙️ VoRtex<span>ГИДРАВЛИК</span></div>
             <nav>
-                <a href="/">Главная</a>
+                <a href="{{ url_for('home') }}">Главная</a>
                 <a href="#">Каталог</a>
                 <a href="#">О компании</a>
-                <a href="/contacts" class="active">Контакты</a>
+                <a href="{{ url_for('contacts') }}" class="active">Контакты</a>
             </nav>
             <div class="header-contacts">
-                <div class="phone">+7 (777) 123-4567</div>
-                <div>г. Астана, ул. Промышленная, 1А</div>
+                <div class="phone">+7 (701) 214-0307</div>
+                <div>г. Астана, ул. Кошкарбаева 80, ВП20</div>
             </div>
-            <a href="/#login-form" class="btn-lk">Личный кабинет</a>
+            
+            <div>
+                {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn-lk">Админка</a>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Выйти</a>
+                {% elif session.get('role') == 'client' %}
+                    <a href="{{ url_for('client_dashboard') }}" class="btn-lk">Кабинет</a>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Выйти</a>
+                {% else %}
+                    <a href="{{ url_for('home') }}#login-form" class="btn-lk">Личный кабинет</a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
-    <!-- Основной контент -->
     <section class="contacts-section">
         <div class="container">
             <h1 class="page-title">Контакты</h1>
             <p class="page-subtitle">Свяжитесь с нами любым удобным способом или оставьте заявку на изготовление РВД шлангов</p>
             
             <div class="contacts-grid">
-                <!-- Контактная информация -->
                 <div class="info-card">
                     <div class="info-item">
                         <h3>📍 Адрес производства и склада</h3>
-                        <p>Республика Казахстан, г. Астана,<br>ул. Промышленная, здание 1А, блок Б</p>
+                        <p>Республика Казахстан, г. Астана,<br>ул. Кошкарбаева 80, ВП20</p>
                     </div>
                     <div class="info-item">
                         <h3>📞 Телефоны отдела продаж</h3>
-                        <p><strong>Многоканальный:</strong> +7 (777) 123-4567<br><strong>Для оптовых клиентов:</strong> +7 (701) 987-6543</p>
+                        <p><strong>Многоканальный:</strong> +7 (701) 214-0307<br><strong>Для оптовых клиентов:</strong> +7 (777) 123-4567</p>
                     </div>
                     <div class="info-item">
                         <h3>✉️ Электронная почта</h3>
-                        <p><strong>Общие вопросы:</strong> info@promgidravlika.kz<br><strong>Отдел заявок:</strong> sales@promgidravlika.kz</p>
+                        <p><strong>Общие вопросы:</strong> info@vortex-gidravlik.kz<br><strong>Отдел заявок:</strong> sales@vortex-gidravlik.kz</p>
                     </div>
                     <div class="info-item">
                         <h3>⏰ Режим работы</h3>
@@ -96,7 +110,6 @@
                     </div>
                 </div>
 
-                <!-- Форма обратной связи -->
                 <div class="form-card">
                     <h3>Напишите нам</h3>
                     <form onsubmit="alert('Спасибо! Ваша заявка успешно отправлена (демо).'); return false;">
@@ -119,10 +132,9 @@
         </div>
     </section>
 
-    <!-- Подвал -->
     <footer>
         <div class="container footer-inner">
-            <div>© 2026 ТОО ПромГидравлика. Все права защищены.</div>
+            <div>© 2026 ТОО Адым Инжиниринг. Все права защищены.</div>
             <div>Разработка сайта на Python + Flask</div>
         </div>
     </footer>
