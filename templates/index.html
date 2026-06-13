@@ -7,6 +7,8 @@
     <style>
         /* Общие стили */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        /* ДОБАВЛЕНО: Плавная прокрутка к форме */
+        html { scroll-behavior: smooth; } 
         body { background: #f8fafc; color: #334155; }
         a { text-decoration: none; color: inherit; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
@@ -24,6 +26,9 @@
         /* Кнопка ЛК в шапке */
         .btn-lk { background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; transition: 0.3s; }
         .btn-lk:hover { background: #2563eb; }
+        /* Новая кнопка Выйти */
+        .btn-logout { background: #ef4444; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; transition: 0.3s; margin-left: 10px; }
+        .btn-logout:hover { background: #dc2626; }
 
         /* Главный баннер (Hero Section) */
         .hero { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 100px 0; position: relative; overflow: hidden; }
@@ -75,16 +80,27 @@
         <div class="container header-inner">
             <div class="logo">⚙️ VoRtex<span>ГИДРАВЛИК</span></div>
             <nav>
-                <a href="#">Главная</a>
+                <a href="{{ url_for('home') }}">Главная</a>
                 <a href="#">Каталог</a>
                 <a href="#">О компании</a>
-                <a href="/contacts">Контакты</a>
+                <a href="{{ url_for('contacts') }}">Контакты</a>
             </nav>
             <div class="header-contacts">
                 <div class="phone">+7 (701) 214-0307</div>
                 <div>г. Астана, ул. Кошкарбаева 80, ВП20</div>
             </div>
-            <a href="#login-form" class="btn-lk">Личный кабинет</a>
+            
+            <div>
+                {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn-lk">Админка</a>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Выйти</a>
+                {% elif session.get('role') == 'client' %}
+                    <a href="{{ url_for('client_dashboard') }}" class="btn-lk">Кабинет</a>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Выйти</a>
+                {% else %}
+                    <a href="#login-form" class="btn-lk">Личный кабинет</a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
@@ -96,25 +112,37 @@
             </div>
             
             <div class="hero-form-box" id="login-form">
-                <h3>Вход в систему</h3>
-                {% if error %}
-                    <div class="error">{{ error }}</div>
+                {% if session.get('user') %}
+                    <h3>Вы уже вошли как</h3>
+                    <p style="margin-bottom: 20px; font-weight: 600; color: #0f172a;">{{ session.get('name') }}</p>
+                    <p style="margin-bottom: 20px; font-size: 0.9rem; color: #64748b;">Учетная запись: {{ session.get('user') }}</p>
+                    {% if session.get('role') == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn-submit" style="display:block; text-align:center; line-height:2.5;">В панель управления</a>
+                    {% else %}
+                        <a href="{{ url_for('client_dashboard') }}" class="btn-submit" style="display:block; text-align:center; line-height:2.5;">В личный кабинет</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="reg-link" style="color: #ef4444;">Сменить пользователя (Выйти)</a>
+                {% else %}
+                    <h3>Вход в систему</h3>
+                    {% if error %}
+                        <div class="error">{{ error }}</div>
+                    {% endif %}
+                    {% if message %}
+                        <div class="message">{{ message }}</div>
+                    {% endif %}
+                    <form action="{{ url_for('login') }}" method="POST">
+                        <div class="input-group">
+                            <label>Ваш Email</label>
+                            <input type="email" name="email" required placeholder="example@test.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Пароль</label>
+                            <input type="password" name="password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn-submit">Войти</button>
+                    </form>
+                    <a href="{{ url_for('register') }}" class="reg-link">Создать личный кабинет клиента</a>
                 {% endif %}
-                {% if message %}
-                    <div class="message">{{ message }}</div>
-                {% endif %}
-                <form action="/login" method="POST">
-                    <div class="input-group">
-                        <label>Ваш Email</label>
-                        <input type="email" name="email" required placeholder="example@test.com">
-                    </div>
-                    <div class="input-group">
-                        <label>Пароль</label>
-                        <input type="password" name="password" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn-submit">Войти</button>
-                </form>
-                <a href="/register" class="reg-link">Создать личный кабинет клиента</a>
             </div>
         </div>
     </section>
@@ -148,7 +176,7 @@
                     <div class="product-info">
                         <h5>Рукава 1SN / 2SN</h5>
                         <p>Стандартные гидравлические рукава с одной и двумя оплетками.</p>
-                        <a href="/register" class="btn-buy">Заказать</a>
+                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
                     </div>
                 </div>
                 <div class="product-card">
@@ -156,7 +184,7 @@
                     <div class="product-info">
                         <h5>Фитинги DKOL / DKOS</h5>
                         <p>Метрическая арматура высокого давления для техники.</p>
-                        <a href="/register" class="btn-buy">Заказать</a>
+                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
                     </div>
                 </div>
                 <div class="product-card">
@@ -164,7 +192,7 @@
                     <div class="product-info">
                         <h5>Обжимные станки</h5>
                         <p>Пресса для сборки и опрессовки РВД шлангов в цеху.</p>
-                        <a href="/register" class="btn-buy">Заказать</a>
+                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
                     </div>
                 </div>
                 <div class="product-card">
@@ -172,7 +200,7 @@
                     <div class="product-info">
                         <h5>Пластиковая спираль</h5>
                         <p>Защита шлангов от механического износа и трения.</p>
-                        <a href="/register" class="btn-buy">Заказать</a>
+                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
                     </div>
                 </div>
             </div>
