@@ -102,33 +102,39 @@ def admin_dashboard():
         return render_template('admin.html', name=session['name'], users=all_users)
     return redirect(url_for('home'))
 
-# --- НОВЫЕ ФУНКЦИИ ДЛЯ АДМИНА ---
+# --- ОБНОВЛЕННЫЕ ФУНКЦИИ УПРАВЛЕНИЯ (ПРИНИМАЮТ POST ИЗ HTML) ---
 
-@app.route('/admin/delete/<int:user_id>')
+@app.route('/admin/delete/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    # Проверяем, что это точно админ
     if 'user' in session and session['role'] == 'admin':
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
-        # Удаляем пользователя по его ID
-        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
-        conn.commit()
+        
+        # Защитная проверка: не удалять главного админа
+        cursor.execute("SELECT email FROM users WHERE id = ?", (user_id,))
+        target_user = cursor.fetchone()
+        
+        if target_user and target_user[0] != 'admin@test.com':
+            cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+            conn.commit()
+            
         conn.close()
     return redirect(url_for('admin_dashboard'))
 
-@app.route('/admin/toggle_role/<int:user_id>')
+@app.route('/admin/toggle_role/<int:user_id>', methods=['POST'])
 def toggle_role(user_id):
     if 'user' in session and session['role'] == 'admin':
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
-        cursor.execute("SELECT role FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT role, email FROM users WHERE id = ?", (user_id,))
         user = cursor.fetchone()
         
-        if user:
-            # Если был клиентом -> станет админом, и наоборот
+        # Меняем роль всем, кроме главного админа
+        if user and user[1] != 'admin@test.com':
             new_role = 'admin' if user[0] == 'client' else 'client'
             cursor.execute("UPDATE users SET role = ? WHERE id = ?", (new_role, user_id))
             conn.commit()
+            
         conn.close()
     return redirect(url_for('admin_dashboard'))
 
