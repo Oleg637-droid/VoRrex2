@@ -1,19 +1,28 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import sqlite3
+import os
+import psycopg2  # Вместо sqlite3 используем psycopg2 для PostgreSQL
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key-change-me-later'
 
-DB_FILE = 'database.db'
+# --- ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ RENDER ---
+# На Render строку подключения лучше брать из переменных окружения.
+# Локально (на компьютере) вставьте вашу скопированную строку Internal/External URL вместо 'ваша_строка_от_render'
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://vortex_admin:5kevZJOhBN9sGTxkYUVnqnfWZrb3YL8x@dpg-d8n6cfkm0tmc73dpedh0-a/vortex_qfmw')
+
+def get_db_connection():
+    # Функция для быстрого подключения к PostgreSQL
+    conn = psycopg2.connect(DATABASE_URL)
+    return conn
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Таблица пользователей
+    # 1. Таблица пользователей (в Postgres синтаксис немного отличается: SERIAL вместо AUTOINCREMENT)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
@@ -21,10 +30,10 @@ def init_db():
         )
     ''')
     
-    # 2. НОВАЯ ТАБЛИЦА: Каталог товаров
+    # 2. Таблица Каталога товаров
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             category TEXT NOT NULL,
             price REAL NOT NULL,
@@ -37,11 +46,11 @@ def init_db():
     cursor.execute("SELECT * FROM users WHERE email='admin@test.com'")
     if not cursor.fetchone():
         cursor.execute(
-            "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+            "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)",
             ("Главный Админ", "admin@test.com", "123", "admin")
         )
         
-    # Заполняем каталог базовыми товарами (если таблица пуста)
+    # Заполняем каталог базовыми товарами (если пуст)
     cursor.execute("SELECT COUNT(*) FROM products")
     if cursor.fetchone()[0] == 0:
         initial_products = [
@@ -51,13 +60,15 @@ def init_db():
             ('Обжимная муфта 2SN DN12', 'Муфты', 600.0, 'Муфта для опрессовки двухслойных рукавов.', 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=400')
         ]
         cursor.executemany(
-            "INSERT INTO products (title, category, price, description, image_url) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO products (title, category, price, description, image_url) VALUES (%s, %s, %s, %s, %s)",
             initial_products
         )
         
     conn.commit()
+    cursor.close()
     conn.close()
 
+# Запускаем инициализацию при старте
 init_db()
 
 @app.route('/')
@@ -67,26 +78,23 @@ def home():
 @app.route('/catalog')
 def catalog():
     selected_category = request.args.get('category', '')
-    
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Получаем список всех уникальных категорий для бокового меню
     cursor.execute("SELECT DISTINCT category FROM products")
     categories = [row[0] for row in cursor.fetchall()]
 
-    # Если категория выбрана — фильтруем, если нет — показываем все товары
     if selected_category:
         cursor.execute(
-            "SELECT id, title, category, price, description, image_url FROM products WHERE category = ?", 
+            "SELECT id, title, category, price, description, image_url FROM products WHERE category = %s", 
             (selected_category,)
         )
     else:
         cursor.execute("SELECT id, title, category, price, description, image_url FROM products")
         
     products = cursor.fetchall()
+    cursor.close()
     conn.close()
-
     return render_template('catalog.html', products=products, categories=categories, current_category=selected_category)
 
 @app.route('/contacts')
@@ -98,10 +106,11 @@ def login():
     email = request.form.get('email')
     password = request.form.get('password')
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT name, role, password FROM users WHERE email = ?", (email,))
+    cursor.execute("SELECT name, role, password FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
+    cursor.close()
     conn.close()
     
     if user and user[2] == password:
@@ -123,18 +132,20 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         try:
             cursor.execute(
-                "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+                "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)",
                 (name, email, password, 'client')
             )
             conn.commit()
+            cursor.close()
             conn.close()
             return render_template('index.html', message="Регистрация успешна! Теперь войдите.")
-        except sqlite3.IntegrityError:
+        except psycopg2.IntegrityError:
+            cursor.close()
             conn.close()
             return render_template('register.html', error="Пользователь с таким Email уже существует")
             
@@ -146,26 +157,22 @@ def client_dashboard():
         return render_template('client.html', name=session['name'])
     return redirect(url_for('home'))
 
-# --- ОБНОВЛЕННАЯ АДМИНКА (Управление пользователями + Товарами) ---
 @app.route('/admin')
 def admin_dashboard():
     if 'user' in session and session['role'] == 'admin':
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Берем пользователей
         cursor.execute("SELECT id, name, email, role FROM users")
         all_users = cursor.fetchall()
         
-        # Берем товары
         cursor.execute("SELECT id, title, category, price FROM products")
         all_products = cursor.fetchall()
         
+        cursor.close()
         conn.close()
         return render_template('admin.html', name=session['name'], users=all_users, products=all_products)
     return redirect(url_for('home'))
-
-# --- УПРАВЛЕНИЕ КАТАЛОГОМ (ДЛЯ АДМИНА) ---
 
 @app.route('/admin/add_product', methods=['POST'])
 def add_product():
@@ -176,54 +183,25 @@ def add_product():
         description = request.form.get('description')
         image_url = request.form.get('image_url') or 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=400'
         
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO products (title, category, price, description, image_url) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO products (title, category, price, description, image_url) VALUES (%s, %s, %s, %s, %s)",
             (title, category, price, description, image_url)
         )
         conn.commit()
+        cursor.close()
         conn.close()
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
 def delete_product(product_id):
     if 'user' in session and session['role'] == 'admin':
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
+        cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
         conn.commit()
-        conn.close()
-    return redirect(url_for('admin_dashboard'))
-
-# --- УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ---
-
-@app.route('/admin/delete/<int:user_id>', methods=['POST'])
-def delete_user(user_id):
-    if 'user' in session and session['role'] == 'admin':
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute("SELECT email FROM users WHERE id = ?", (user_id,))
-        target_user = cursor.fetchone()
-        
-        if target_user and target_user[0] != 'admin@test.com':
-            cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
-            conn.commit()
-        conn.close()
-    return redirect(url_for('admin_dashboard'))
-
-@app.route('/admin/toggle_role/<int:user_id>', methods=['POST'])
-def toggle_role(user_id):
-    if 'user' in session and session['role'] == 'admin':
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute("SELECT role, email FROM users WHERE id = ?", (user_id,))
-        user = cursor.fetchone()
-        
-        if user and user[1] != 'admin@test.com':
-            new_role = 'admin' if user[0] == 'client' else 'client'
-            cursor.execute("UPDATE users SET role = ? WHERE id = ?", (new_role, user_id))
-            conn.commit()
+        cursor.close()
         conn.close()
     return redirect(url_for('admin_dashboard'))
 
