@@ -84,7 +84,7 @@
             <div class="logo">⚙️ VoRtex<span>ГИДРАВЛИК</span></div>
             <nav>
                 <a href="{{ url_for('home') }}">Главная</a>
-                <a href="#catalog">Каталог</a>
+                <a href="{{ url_for('catalog') }}">Каталог</a>
                 <a href="#">О компании</a>
                 <a href="{{ url_for('contacts') }}">Контакты</a>
             </nav>
@@ -170,31 +170,7 @@
         </div>
     </section>
 
-    <section class="products" id="catalog">
-        <div class="container">
-            <div class="section-title">Наша продукция</div>
-            <div class="products-grid">
-                {% for product in products %}
-                <div class="product-card">
-                    <div class="product-img-container">
-                        <img src="{{ product[5] }}" alt="{{ product[1] }}">
-                    </div>
-                    <div class="product-info">
-                        <div>
-                            <span class="product-category">{{ product[2] }}</span>
-                            <h5>{{ product[1] }}</h5>
-                            <p>{{ product[4] }}</p>
-                        </div>
-                        <div>
-                            <div class="product-price">{{ product[3] }} ₸</div>
-                            <button class="btn-buy" onclick="alert('Вы выбрали товар: {{ product[1] }}. Менеджер свяжется с вами для уточнения деталей заказа.')">Заказать</button>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
+    
 
     <footer>
         <div class="container footer-inner">
