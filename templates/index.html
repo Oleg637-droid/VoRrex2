@@ -7,7 +7,7 @@
     <style>
         /* Общие стили */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        /* ДОБАВЛЕНО: Плавная прокрутка к форме */
+        /* ДОБАВЛЕНО: Плавная прокрутка к форме и каталогу */
         html { scroll-behavior: smooth; } 
         body { background: #f8fafc; color: #334155; }
         a { text-decoration: none; color: inherit; }
@@ -57,17 +57,20 @@
         .feature-card h4 { font-size: 1.2rem; color: #0f172a; margin-bottom: 10px; }
         .feature-card p { color: #64748b; font-size: 0.95rem; line-height: 1.5; }
 
-        /* Блок продукции (Каталог) */
+        /* Блок продукции (Динамический каталог) */
         .products { padding: 80px 0; }
         .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s; }
+        .product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .product-img { height: 180px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-weight: 700; }
-        .product-info { padding: 20px; }
-        .product-info h5 { font-size: 1.1rem; color: #0f172a; margin-bottom: 10px; }
-        .product-info p { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; }
-        .btn-buy { display: block; text-align: center; background: #f1f5f9; color: #0f172a; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
-        .btn-buy:hover { background: #3b82f6; color: white; transition: 0.2s; }
+        .product-img-container { width: 100%; height: 180px; background: #e2e8f0; overflow: hidden; }
+        .product-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .product-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-category { font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: inline-block; margin-bottom: 8px; width: fit-content; }
+        .product-info h5 { font-size: 1.1rem; color: #0f172a; margin-bottom: 6px; }
+        .product-info p { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4; }
+        .product-price { font-size: 1.25rem; font-weight: 800; color: #3b82f6; margin-bottom: 12px; }
+        .btn-buy { display: block; text-align: center; background: #f1f5f9; color: #0f172a; padding: 10px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; border: none; width: 100%; cursor: pointer; transition: 0.2s; }
+        .btn-buy:hover { background: #3b82f6; color: white; }
 
         /* Подвал сайта (Footer) */
         footer { background: #0f172a; color: #64748b; padding: 40px 0; font-size: 0.9rem; border-top: 1px solid #1e293b; }
@@ -81,7 +84,7 @@
             <div class="logo">⚙️ VoRtex<span>ГИДРАВЛИК</span></div>
             <nav>
                 <a href="{{ url_for('home') }}">Главная</a>
-                <a href="#">Каталог</a>
+                <a href="#catalog">Каталог</a>
                 <a href="#">О компании</a>
                 <a href="{{ url_for('contacts') }}">Контакты</a>
             </nav>
@@ -167,42 +170,28 @@
         </div>
     </section>
 
-    <section class="products">
+    <section class="products" id="catalog">
         <div class="container">
             <div class="section-title">Наша продукция</div>
             <div class="products-grid">
+                {% for product in products %}
                 <div class="product-card">
-                    <div class="product-img">РВД Шланги</div>
+                    <div class="product-img-container">
+                        <img src="{{ product[5] }}" alt="{{ product[1] }}">
+                    </div>
                     <div class="product-info">
-                        <h5>Рукава 1SN / 2SN</h5>
-                        <p>Стандартные гидравлические рукава с одной и двумя оплетками.</p>
-                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
+                        <div>
+                            <span class="product-category">{{ product[2] }}</span>
+                            <h5>{{ product[1] }}</h5>
+                            <p>{{ product[4] }}</p>
+                        </div>
+                        <div>
+                            <div class="product-price">{{ product[3] }} ₸</div>
+                            <button class="btn-buy" onclick="alert('Вы выбрали товар: {{ product[1] }}. Менеджер свяжется с вами для уточнения деталей заказа.')">Заказать</button>
+                        </div>
                     </div>
                 </div>
-                <div class="product-card">
-                    <div class="product-img">Фитинги</div>
-                    <div class="product-info">
-                        <h5>Фитинги DKOL / DKOS</h5>
-                        <p>Метрическая арматура высокого давления для техники.</p>
-                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-img">Оборудование</div>
-                    <div class="product-info">
-                        <h5>Обжимные станки</h5>
-                        <p>Пресса для сборки и опрессовки РВД шлангов в цеху.</p>
-                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-img">Защита</div>
-                    <div class="product-info">
-                        <h5>Пластиковая спираль</h5>
-                        <p>Защита шлангов от механического износа и трения.</p>
-                        <a href="{{ url_for('register') }}" class="btn-buy">Заказать</a>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
