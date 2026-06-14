@@ -62,13 +62,32 @@ init_db()
 
 @app.route('/')
 def home():
-    # Вытягиваем товары из базы для показа на главной
+    return render_template('index.html')
+
+@app.route('/catalog')
+def catalog():
+    selected_category = request.args.get('category', '')
+    
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, category, price, description, image_url FROM products")
-    catalog_items = cursor.fetchall()
+
+    # Получаем список всех уникальных категорий для бокового меню
+    cursor.execute("SELECT DISTINCT category FROM products")
+    categories = [row[0] for row in cursor.fetchall()]
+
+    # Если категория выбрана — фильтруем, если нет — показываем все товары
+    if selected_category:
+        cursor.execute(
+            "SELECT id, title, category, price, description, image_url FROM products WHERE category = ?", 
+            (selected_category,)
+        )
+    else:
+        cursor.execute("SELECT id, title, category, price, description, image_url FROM products")
+        
+    products = cursor.fetchall()
     conn.close()
-    return render_template('index.html', products=catalog_items)
+
+    return render_template('catalog.html', products=products, categories=categories, current_category=selected_category)
 
 @app.route('/contacts')
 def contacts():
