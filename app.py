@@ -75,27 +75,30 @@ init_db()
 def home():
     return render_template('index.html')
 
+from flask import render_template, request
+
 @app.route('/catalog')
 def catalog():
-    selected_category = request.args.get('category', '')
+    category = request.args.get('category') # Получаем категорию из ссылки, если есть
     conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT DISTINCT category FROM products")
-    categories = [row[0] for row in cursor.fetchall()]
-
-    if selected_category:
-        cursor.execute(
-            "SELECT id, title, category, price, description, image_url FROM products WHERE category = %s", 
-            (selected_category,)
-        )
+    cur = conn.cursor()
+    
+    # Если выбрана категория — фильтруем, если нет — показываем всё
+    if category:
+        cur.execute("SELECT * FROM products WHERE category = %s", (category,))
     else:
-        cursor.execute("SELECT id, title, category, price, description, image_url FROM products")
+        cur.execute("SELECT * FROM products")
         
-    products = cursor.fetchall()
-    cursor.close()
+    products = cur.fetchall()
+    
+    # Также получаем список уникальных категорий для сайдбара
+    cur.execute("SELECT DISTINCT category FROM products")
+    categories = [row[0] for row in cur.fetchall()]
+    
+    cur.close()
     conn.close()
-    return render_template('catalog.html', products=products, categories=categories, current_category=selected_category)
+    
+    return render_template('catalog.html', products=products, categories=categories, current_category=category)
 
 @app.route('/contacts')
 def contacts():
