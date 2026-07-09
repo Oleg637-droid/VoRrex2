@@ -51,6 +51,17 @@
             <div class="menu-item">💬 Чат с клиентами (В разработке)</div>
             <div class="menu-item">📊 Статистика сайта (В разработке)</div>
         </div>
+        <div class="admin-nav">
+            <a href="?tab=products">Товары склада</a>
+            <a href="?tab=requests">Заявки клиентов</a>
+            <a href="?tab=calculator">Просчет РВД</a>
+            <a href="?tab=reports">Отчеты</a>
+            <a href="?tab=tasks">Задачи</a>
+        </div>
+
+{% if request.args.get('tab') == 'products' %}
+    {% elif request.args.get('tab') == 'requests' %}
+    {% endif %}
 
         <h3>👥 Управление аккаунтами пользователей:</h3>
         <table>
