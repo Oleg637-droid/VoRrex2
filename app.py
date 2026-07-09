@@ -163,6 +163,9 @@ def client_dashboard():
 @app.route('/admin')
 def admin_dashboard():
     if 'user' in session and session['role'] == 'admin':
+        # Получаем вкладку из ссылки (например, /admin?tab=users). Если вкладка не выбрана, ставим 'products'
+        tab = request.args.get('tab', 'products')
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -174,7 +177,10 @@ def admin_dashboard():
         
         cursor.close()
         conn.close()
-        return render_template('admin.html', name=session['name'], users=all_users, products=all_products)
+        
+        # Передаем переменную tab в шаблон
+        return render_template('admin.html', name=session['name'], 
+                               users=all_users, products=all_products, tab=tab)
     return redirect(url_for('home'))
 
 @app.route('/admin/add_product', methods=['POST'])
