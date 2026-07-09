@@ -195,22 +195,21 @@ def admin_dashboard():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Запрос пользователей
+        # 1. Пользователи
         cursor.execute("SELECT id, name, email, role FROM users")
         all_users = cursor.fetchall()
         
-        # Запрос товаров
-        cursor.execute("SELECT id, title, category, price, description, image_url, warehouse FROM products")
+        # 2. Товары (забираем всё через *)
+        cursor.execute("SELECT * FROM products")
         all_products = cursor.fetchall()
         
-        # --- ДОБАВЛЯЕМ ЗАПРОС ЗАЯВОК ---
+        # 3. Заявки
         cursor.execute("SELECT id, name, phone, message, created_at FROM messages ORDER BY created_at DESC")
         all_messages = cursor.fetchall()
         
         cursor.close()
         conn.close()
         
-        # Передаем all_messages в шаблон
         return render_template('admin.html', name=session['name'], 
                                users=all_users, products=all_products, 
                                messages=all_messages, tab=tab)
