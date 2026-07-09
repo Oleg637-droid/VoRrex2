@@ -41,6 +41,15 @@ def init_db():
             image_url TEXT
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            message TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     
     # Создаем главного админа, если его нет
     cursor.execute("SELECT * FROM users WHERE email='admin@test.com'")
@@ -100,8 +109,21 @@ def catalog():
     
     return render_template('catalog.html', products=products, categories=categories, current_category=category)
 
-@app.route('/contacts')
+@app.route('/contacts', methods=['GET', 'POST'])
 def contacts():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        msg = request.form.get('message')
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO messages (name, phone, message) VALUES (%s, %s, %s)", (name, phone, msg))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return "Спасибо, заявка принята!" # Или перенаправь на главную
+        
     return render_template('contacts.html')
 
 @app.route('/login', methods=['POST'])
@@ -163,24 +185,30 @@ def client_dashboard():
 @app.route('/admin')
 def admin_dashboard():
     if 'user' in session and session['role'] == 'admin':
-        # Получаем вкладку из ссылки (например, /admin?tab=users). Если вкладка не выбрана, ставим 'products'
         tab = request.args.get('tab', 'products')
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # Запрос пользователей
         cursor.execute("SELECT id, name, email, role FROM users")
         all_users = cursor.fetchall()
         
+        # Запрос товаров
         cursor.execute("SELECT id, title, category, price FROM products")
         all_products = cursor.fetchall()
+        
+        # --- ДОБАВЛЯЕМ ЗАПРОС ЗАЯВОК ---
+        cursor.execute("SELECT id, name, phone, message, created_at FROM messages ORDER BY created_at DESC")
+        all_messages = cursor.fetchall()
         
         cursor.close()
         conn.close()
         
-        # Передаем переменную tab в шаблон
+        # Передаем all_messages в шаблон
         return render_template('admin.html', name=session['name'], 
-                               users=all_users, products=all_products, tab=tab)
+                               users=all_users, products=all_products, 
+                               messages=all_messages, tab=tab)
     return redirect(url_for('home'))
 
 @app.route('/admin/add_product', methods=['POST'])
