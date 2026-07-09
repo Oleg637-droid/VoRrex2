@@ -200,7 +200,7 @@ def admin_dashboard():
         all_users = cursor.fetchall()
         
         # Запрос товаров
-        cursor.execute("SELECT id, title, category, price FROM products")
+        cursor.execute("SELECT id, title, category, price, description, image_url, warehouse FROM products")
         all_products = cursor.fetchall()
         
         # --- ДОБАВЛЯЕМ ЗАПРОС ЗАЯВОК ---
