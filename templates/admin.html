@@ -2,26 +2,23 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Панель администратора — VoRtex</title>
+    <title>Админ-панель — VoRtex</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; color: white; padding: 40px; }
-        .panel { background: #34495e; padding: 40px; border-radius: 12px; max-width: 1000px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; color: white; padding: 20px; }
+        .panel { background: #34495e; padding: 30px; border-radius: 12px; max-width: 1000px; margin: 0 auto; }
         h1 { color: #1abc9c; margin-bottom: 20px; }
         
-        /* Меню вкладок */
-        .admin-nav { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; }
+        .admin-nav { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; flex-wrap: wrap; }
         .admin-nav a { color: #bdc3c7; text-decoration: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; }
         .admin-nav a.active { background: #1abc9c; color: white; }
 
-        /* Таблицы */
-        table { width: 100%; border-collapse: collapse; background: #2c3e50; border-radius: 8px; overflow: hidden; margin-top: 10px; }
-        th, td { padding: 12px 15px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; background: #2c3e50; margin-bottom: 30px; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #3e5871; }
         th { background-color: #2980b9; }
-        tr:nth-child(even) { background-color: #3e5871; }
         
-        /* Формы и кнопки */
-        form input, form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: none; }
+        form { background: #2c3e50; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: none; }
         button { background: #1abc9c; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-delete { background: #e74c3c; }
     </style>
@@ -31,59 +28,61 @@
         <h1>⚙️ Панель управления: {{ name }}</h1>
         
         <div class="admin-nav">
-            <a href="{{ url_for('admin_dashboard', tab='products') }}" class="{{ 'active' if tab == 'products' }}">Товары</a>
+            <a href="{{ url_for('admin_dashboard', tab='sklad') }}" class="{{ 'active' if tab == 'sklad' }}">Складской учет</a>
+            <a href="{{ url_for('admin_dashboard', tab='products') }}" class="{{ 'active' if tab == 'products' }}">Добавить товар</a>
             <a href="{{ url_for('admin_dashboard', tab='users') }}" class="{{ 'active' if tab == 'users' }}">Пользователи</a>
             <a href="{{ url_for('admin_dashboard', tab='requests') }}" class="{{ 'active' if tab == 'requests' }}">Заявки</a>
         </div>
 
-        {% if tab == 'products' %}
-            <h3>📦 Добавление товара</h3>
+        {% if tab == 'sklad' %}
+            <h3>📦 Остатки по складам</h3>
+            {% for wh in ['Офис', 'Склад 1', 'Склад 2', 'Склад 3'] %}
+                <h4>📍 {{ wh }}</h4>
+                <table>
+                    <tr><th>Название</th><th>Цена</th><th>Удалить</th></tr>
+                    {% for p in products %}
+                        {% if p[6] == wh or (p[6] == None and wh == 'Офис') %}
+                        <tr>
+                            <td>{{ p[1] }}</td>
+                            <td>{{ p[3] }} ₸</td>
+                            <td>
+                                <form action="{{ url_for('delete_product', product_id=p[0]) }}" method="POST">
+                                    <button type="submit" class="btn-delete">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            {% endfor %}
+
+        {% elif tab == 'products' %}
+            <h3>➕ Добавить товар</h3>
             <form action="{{ url_for('add_product') }}" method="POST">
-                <input type="text" name="title" placeholder="Название товара" required>
+                <input type="text" name="title" placeholder="Название" required>
                 <input type="text" name="category" placeholder="Категория" required>
                 <input type="number" step="0.01" name="price" placeholder="Цена" required>
-                <textarea name="description" placeholder="Описание"></textarea>
-                <button type="submit">Добавить в каталог</button>
-                <select name="warehouse" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+                <select name="warehouse">
                     <option value="Офис">Офис</option>
                     <option value="Склад 1">Склад 1</option>
                     <option value="Склад 2">Склад 2</option>
                     <option value="Склад 3">Склад 3</option>
                 </select>
+                <textarea name="description" placeholder="Описание"></textarea>
+                <button type="submit">Сохранить на склад</button>
             </form>
 
-            <h3>📋 Список товаров в базе</h3>
-            <table>
-                <tr><th>ID</th><th>Название</th><th>Цена</th><th>Действие</th></tr>
-                {% for product in products %}
-                <tr>
-                    <td>{{ product[0] }}</td>
-                    <td>{{ product[1] }}</td>
-                    <td>{{ product[3] }} ₸</td>
-                    <td>
-                        <form action="{{ url_for('delete_product', product_id=product[0]) }}" method="POST">
-                            <button type="submit" class="btn-delete">Удалить</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-
         {% elif tab == 'users' %}
-            <h3>👥 Зарегистрированные пользователи</h3>
+            <h3>👥 Пользователи</h3>
             <table>
                 <tr><th>Имя</th><th>Email</th><th>Роль</th></tr>
                 {% for user in users %}
-                <tr>
-                    <td>{{ user[1] }}</td>
-                    <td>{{ user[2] }}</td>
-                    <td>{{ user[3] }}</td>
-                </tr>
+                <tr><td>{{ user[1] }}</td><td>{{ user[2] }}</td><td>{{ user[3] }}</td></tr>
                 {% endfor %}
             </table>
 
         {% elif tab == 'requests' %}
-            <h3>📩 Заявки от клиентов</h3>
+            <h3>📩 Заявки</h3>
             <table>
                 <tr><th>Дата</th><th>Имя</th><th>Телефон</th><th>Сообщение</th></tr>
                 {% for msg in messages %}
@@ -97,8 +96,7 @@
             </table>
         {% endif %}
 
-        <br>
-        <a href="{{ url_for('home') }}" style="color: #bdc3c7;">← Вернуться на сайт</a>
+        <a href="{{ url_for('home') }}" style="color: #bdc3c7;">← На главную</a>
     </div>
 </body>
 </html>
