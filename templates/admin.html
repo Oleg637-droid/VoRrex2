@@ -39,9 +39,9 @@
             {% for wh in ['Офис', 'Склад 1', 'Склад 2', 'Склад 3'] %}
                 <h4>📍 {{ wh }}</h4>
                 <table>
-                    <tr><th>Название</th><th>Цена</th><th>Удалить</th></tr>
+                    <tr><th>Название</th><th>Цена</th><th>Действие</th></tr>
                     {% for p in products %}
-                        {% if p[6] == wh or (p[6] == None and wh == 'Офис') %}
+                        {% if p[6] == wh or (p[6] is none and wh == 'Офис') %}
                         <tr>
                             <td>{{ p[1] }}</td>
                             <td>{{ p[3] }} ₸</td>
@@ -55,6 +55,7 @@
                     {% endfor %}
                 </table>
             {% endfor %}
+        {% endif %}
 
         {% elif tab == 'products' %}
             <h3>➕ Добавить товар</h3>
