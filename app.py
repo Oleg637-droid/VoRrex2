@@ -41,6 +41,11 @@ def init_db():
             image_url TEXT
         )
     ''')
+    try:
+        cursor.execute("ALTER TABLE products ADD COLUMN warehouse TEXT DEFAULT 'Офис'")
+        conn.commit()
+    except:
+        conn.rollback() # Если колонка уже есть, просто пропускаем ошибку
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
             id SERIAL PRIMARY KEY,
