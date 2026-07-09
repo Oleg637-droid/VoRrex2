@@ -217,19 +217,19 @@ def add_product():
         title = request.form.get('title')
         category = request.form.get('category')
         price = float(request.form.get('price', 0))
-        description = request.form.get('description')
-        image_url = request.form.get('image_url') or 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=400'
+        warehouse = request.form.get('warehouse') # Получаем склад
         
         conn = get_db_connection()
         cursor = conn.cursor()
+        # Добавляем в запрос новое поле warehouse
         cursor.execute(
-            "INSERT INTO products (title, category, price, description, image_url) VALUES (%s, %s, %s, %s, %s)",
-            (title, category, price, description, image_url)
+            "INSERT INTO products (title, category, price, warehouse) VALUES (%s, %s, %s, %s)",
+            (title, category, price, warehouse)
         )
         conn.commit()
         cursor.close()
         conn.close()
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('admin_dashboard', tab='products'))
 
 @app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
 def delete_product(product_id):
