@@ -40,30 +40,32 @@
                 <div style="margin-bottom: 20px; background: #2c3e50; padding: 15px; border-radius: 8px;">
                     <h4 style="color: #1abc9c;">📍 {{ wh }}</h4>
                     
-                    {% set categories = products|map(attribute=2)|unique|list %}
-                    {% for cat in categories %}
-                        <details style="margin-left: 20px; margin-top: 10px; cursor: pointer;">
-                            <summary style="font-weight: bold; padding: 5px; background: #34495e;">📂 {{ cat }}</summary>
-                            <table style="margin-top: 5px;">
-                                <tr><th>Название</th><th>Цена</th><th>Действие</th></tr>
-                                {% for p in products %}
-                                    {% if (p[6] == wh or (p[6] == None and wh == 'Офис')) and p[2] == cat %}
-                                    <tr>
-                                        <td>{{ p[1] }}</td>
-                                        <td>{{ p[3] }} ₸</td>
-                                        <td>
-                                            <form action="{{ url_for('delete_product', product_id=p[0]) }}" method="POST">
-                                                <button type="submit" class="btn-delete" style="padding: 2px 8px;">X</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {% endif %}
-                                {% endfor %}
-                            </table>
+                    {% set parents = products|map(attribute=2)|map('split', '/')|map('first')|unique|list %}
+                    
+                    {% for parent in parents %}
+                        <details style="margin-left: 10px; margin-top: 10px;">
+                            <summary style="font-weight: bold; background: #34495e; padding: 5px;">📂 {{ parent }}</summary>
+                            
+                            {% set subs = products|selectattr(6, 'eq', wh)|map(attribute=2)|select('startswith', parent)|map('split', '/')|map('last')|unique|list %}
+                            
+                            {% for sub in subs %}
+                                {% if sub != parent %} <details style="margin-left: 30px; margin-top: 5px;">
+                                    <summary style="font-style: italic; color: #bdc3c7;">↳ {{ sub }}</summary>
+                                    <table>
+                                        {% for p in products %}
+                                            {% if p[6] == wh and p[2] == (parent ~ '/' ~ sub) %}
+                                            <tr><td>{{ p[1] }}</td><td>{{ p[3] }} ₸</td></tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </table>
+                                </details>
+                                {% endif %}
+                            {% endfor %}
                         </details>
                     {% endfor %}
                 </div>
             {% endfor %}
+        
         
 
         {% elif tab == 'products' %}
