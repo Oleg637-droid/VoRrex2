@@ -258,6 +258,26 @@ def delete_product(product_id):
         conn.close()
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/edit_product/<int:product_id>', methods=['POST'])
+def edit_product(product_id):
+    if 'user' in session and session['role'] == 'admin':
+        # Получаем данные из формы
+        title = request.form.get('title')
+        category = request.form.get('category')
+        price = float(request.form.get('price', 0))
+        warehouse = request.form.get('warehouse')
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE products SET title=%s, category=%s, price=%s, warehouse=%s WHERE id=%s",
+            (title, category, price, warehouse, product_id)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    return redirect(url_for('admin_dashboard', tab='sklad'))
+
 @app.route('/logout')
 def logout():
     session.clear()
