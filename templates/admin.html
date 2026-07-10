@@ -37,24 +37,34 @@
         {% if tab == 'sklad' %}
             <h3>📦 Остатки по складам</h3>
             {% for wh in ['Офис', 'Склад 1', 'Склад 2', 'Склад 3'] %}
-                <h4>📍 {{ wh }}</h4>
-                <table>
-                    <tr><th>Название</th><th>Цена</th><th>Действие</th></tr>
-                    {% for p in products %}
-                        {% if p[6] == wh or (p[6] is none and wh == 'Офис') %}
-                        <tr>
-                            <td>{{ p[1] }}</td>
-                            <td>{{ p[3] }} ₸</td>
-                            <td>
-                                <form action="{{ url_for('delete_product', product_id=p[0]) }}" method="POST">
-                                    <button type="submit" class="btn-delete">Удалить</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endif %}
+                <div style="margin-bottom: 20px; background: #2c3e50; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #1abc9c;">📍 {{ wh }}</h4>
+                    
+                    {% set categories = products|map(attribute=2)|unique|list %}
+                    {% for cat in categories %}
+                        <details style="margin-left: 20px; margin-top: 10px; cursor: pointer;">
+                            <summary style="font-weight: bold; padding: 5px; background: #34495e;">📂 {{ cat }}</summary>
+                            <table style="margin-top: 5px;">
+                                <tr><th>Название</th><th>Цена</th><th>Действие</th></tr>
+                                {% for p in products %}
+                                    {% if (p[6] == wh or (p[6] == None and wh == 'Офис')) and p[2] == cat %}
+                                    <tr>
+                                        <td>{{ p[1] }}</td>
+                                        <td>{{ p[3] }} ₸</td>
+                                        <td>
+                                            <form action="{{ url_for('delete_product', product_id=p[0]) }}" method="POST">
+                                                <button type="submit" class="btn-delete" style="padding: 2px 8px;">X</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </details>
                     {% endfor %}
-                </table>
+                </div>
             {% endfor %}
+        {% endif %}
 
         {% elif tab == 'products' %}
             <h3>➕ Добавить товар</h3>
