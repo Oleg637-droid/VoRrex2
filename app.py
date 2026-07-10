@@ -195,15 +195,27 @@ def admin_dashboard():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # 1. Пользователи
         cursor.execute("SELECT id, name, email, role FROM users")
         all_users = cursor.fetchall()
         
-        # 2. Товары (забираем всё через *)
+        # Получаем товары
         cursor.execute("SELECT * FROM products")
         all_products = cursor.fetchall()
         
-        # 3. Заявки
+        # Готовим структуру для дерева: { "Склад": { "Родитель": { "Подкатегория": [товары] } } }
+        tree_data = {}
+        for p in all_products:
+            wh = p[6] if p[6] else 'Офис'
+            cat_path = p[2].split('/') # Разделяем категорию (например, "Шланги/2SN")
+            parent = cat_path[0]
+            sub = cat_path[1] if len(cat_path) > 1 else "Прочее"
+            
+            if wh not in tree_data: tree_data[wh] = {}
+            if parent not in tree_data[wh]: tree_data[wh][parent] = {}
+            if sub not in tree_data[wh][parent]: tree_data[wh][parent][sub] = []
+            
+            tree_data[wh][parent][sub].append(p)
+        
         cursor.execute("SELECT id, name, phone, message, created_at FROM messages ORDER BY created_at DESC")
         all_messages = cursor.fetchall()
         
@@ -212,7 +224,7 @@ def admin_dashboard():
         
         return render_template('admin.html', name=session['name'], 
                                users=all_users, products=all_products, 
-                               messages=all_messages, tab=tab)
+                               messages=all_messages, tab=tab, tree_data=tree_data)
     return redirect(url_for('home'))
 
 @app.route('/admin/add_product', methods=['POST'])
