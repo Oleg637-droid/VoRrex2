@@ -44,7 +44,7 @@
                             <summary style="font-weight: bold; background: #34495e; padding: 5px;">📂 {{ parent }}</summary>
                             {% for sub, items in subs.items() %}
                                 <details style="margin-left: 30px; margin-top: 5px;">
-                                    <summary style="font-style: italic; color: #bdc3c7;">↳ {{ sub }}</summary>
+                                    <summary style="font-style: italic; color: #bdc3c7;">📂 {{ sub }}</summary>
                                     <table>
                                         {% for p in items %}
                                         <tr><td>{{ p[1] }}</td><td>{{ p[3] }} ₸</td></tr>
