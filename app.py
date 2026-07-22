@@ -184,7 +184,9 @@ def register():
 @app.route('/client')
 def client_dashboard():
     if 'user' in session and session['role'] == 'client':
-        return render_template('client.html', name=session['name'])
+        # Получаем выбранную вкладку (по умолчанию 'profile')
+        tab = request.args.get('tab', 'profile')
+        return render_template('client.html', name=session['name'], email=session['user'], tab=tab)
     return redirect(url_for('home'))
 
 @app.route('/admin')
