@@ -108,28 +108,49 @@
                 <button type="submit">Сохранить на склад</button>
             </form>
 
-        {% elif tab == 'users' %}
-            <h3>👥 Пользователи</h3>
-            <table>
-                <tr><th>Имя</th><th>Email</th><th>Роль</th></tr>
-                {% for user in users %}
-                <tr><td>{{ user[1] }}</td><td>{{ user[2] }}</td><td>{{ user[3] }}</td></tr>
-                {% endfor %}
-            </table>
-
-        {% elif tab == 'requests' %}
-            <h3>📩 Заявки</h3>
-            <table>
-                <tr><th>Дата</th><th>Имя</th><th>Телефон</th><th>Сообщение</th></tr>
-                {% for msg in messages %}
-                <tr>
-                    <td>{{ msg[4].strftime('%d.%m %H:%M') }}</td>
-                    <td>{{ msg[1] }}</td>
-                    <td>{{ msg[2] }}</td>
-                    <td>{{ msg[3] }}</td>
-                </tr>
-                {% endfor %}
-            </table>
+        <!-- Вкладка пользователей в admin.html -->
+        {% if tab == 'users' %}
+        <div class="card-box">
+            <h2>👥 Управление пользователями и клиентами</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Список зарегистрированных пользователей и их реквизиты.</p>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                            <th style="padding: 12px;">ID</th>
+                            <th style="padding: 12px;">Имя / Email</th>
+                            <th style="padding: 12px;">Компания / ИИН</th>
+                            <th style="padding: 12px;">Телефон</th>
+                            <th style="padding: 12px;">Роль</th>
+                            <th style="padding: 12px;">Адрес доставки</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 12px;">{{ u[0] }}</td>
+                            <td style="padding: 12px;">
+                                <div style="font-weight: 600; color: #0f172a;">{{ u[1] }}</div>
+                                <div style="font-size: 0.8rem; color: #64748b;">{{ u[2] }}</div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <div style="font-weight: 600;">{{ u[5] if u[5] else '—' }}</div>
+                                <div style="font-size: 0.8rem; color: #64748b;">ИНН/БИН: {{ u[7] if u[7] else '—' }}</div>
+                            </td>
+                            <td style="padding: 12px;">{{ u[4] if u[4] else '—' }}</td>
+                            <td style="padding: 12px;">
+                                <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; {% if u[3] == 'admin' %}background: #fee2e2; color: #dc2626;{% else %}background: #dbeafe; color: #1d4ed8;{% endif %}">
+                                    {{ u[3] }}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; color: #64748b;">{{ u[6] if u[6] else '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
         {% endif %}
 
         <a href="{{ url_for('home') }}" style="color: #bdc3c7;">← На главную</a>
