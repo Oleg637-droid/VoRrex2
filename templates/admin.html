@@ -149,6 +149,42 @@
             </div>
         {% endif %}
 
+        {% elif tab == 'requests' %}
+            <div class="card-box">
+                <h2>📥 Заявки и сообщения клиентов</h2>
+                <p style="color: #95a5a6; margin-bottom: 20px;">Список обращений, поступивших с сайта.</p>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="background: #2980b9; border-bottom: 2px solid #3e5871;">
+                                <th style="padding: 12px;">ID</th>
+                                <th style="padding: 12px;">Имя</th>
+                                <th style="padding: 12px;">Телефон</th>
+                                <th style="padding: 12px;">Сообщение</th>
+                                <th style="padding: 12px;">Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in messages %}
+                            <tr style="border-bottom: 1px solid #3e5871;">
+                                <td style="padding: 12px;">{{ m[0] }}</td>
+                                <td style="padding: 12px; font-weight: 600;">{{ m[1] }}</td>
+                                <td style="padding: 12px;">{{ m[2] if m[2] else '—' }}</td>
+                                <td style="padding: 12px; color: #ecf0f1;">{{ m[3] }}</td>
+                                <td style="padding: 12px; color: #bdc3c7; font-size: 0.8rem;">{{ m[4] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="padding: 20px; text-align: center; color: #bdc3c7;">Нет новых заявок</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
         <div style="margin-top: 30px;">
             <a href="{{ url_for('home') }}" style="color: #bdc3c7; text-decoration: none;">← На главную</a>
         </div>
