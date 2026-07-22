@@ -92,9 +92,25 @@
             {% if tab == 'profile' %}
             <div class="card-box">
                 <h2>👤 Данные клиента</h2>
-                <p><strong>Имя:</strong> {{ name }}</p>
-                <p style="margin-top: 10px;"><strong>Email:</strong> {{ email }}</p>
-                <p style="margin-top: 10px;"><strong>Тип аккаунта:</strong> Розничный / B2B клиент</p>
+                
+                <!-- Краткая информация (видна всегда) -->
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <p><strong>Имя:</strong> {{ client[0] }}</p>
+                    <p><strong>Email:</strong> {{ client[1] }}</p>
+                    <p><strong>Телефон:</strong> {{ client[2] if client[2] else 'Не указан' }}</p>
+                </div>
+            
+                <!-- Кнопка для разворота полной анкеты -->
+                <details style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer;">
+                    <summary style="font-weight: 600; color: #3b82f6; outline: none;">📋 Посмотреть полные реквизиты компании</summary>
+                    
+                    <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #e2e8f0; paddingTop: 15px; cursor: default;">
+                        <p><strong>Организация / ИП:</strong> {{ client[3] if client[3] else '—' }}</p>
+                        <p><strong>ИНН / БИН:</strong> {{ client[5] if client[5] else '—' }}</p>
+                        <p><strong>Адрес доставки:</strong> {{ client[4] if client[4] else '—' }}</p>
+                        <p style="margin-top: 5px; font-size: 0.85rem; color: #64748b;">Тип аккаунта: B2B / Оптовый партнер</p>
+                    </div>
+                </details>
             </div>
             {% endif %}
 
