@@ -219,7 +219,18 @@ def client_dashboard():
         cursor.close()
         conn.close()
         
-        return render_template('client.html', client=client_data, tab=tab, products=products)
+        # Защита, если вдруг пользователя нет в базе
+        if not client_data:
+            return redirect(url_for('logout'))
+            
+        return render_template(
+            'client.html', 
+            client=client_data, 
+            name=client_data[0],   # Передаем имя для шапки и аватарки
+            email=client_data[1],  # Передаем email
+            tab=tab, 
+            products=products
+        )
     return redirect(url_for('home'))
 
 @app.route('/client/order_parts', methods=['POST'])
