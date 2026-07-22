@@ -20,6 +20,7 @@ def init_db():
     cursor = conn.cursor()
     
     # 1. Таблица пользователей (в Postgres синтаксис немного отличается: SERIAL вместо AUTOINCREMENT)
+    # В функции init_db() для таблицы users
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -29,6 +30,20 @@ def init_db():
             role TEXT NOT NULL
         )
     ''')
+    
+    # Безопасно добавляем новые поля анкеты в таблицу users при их отсутствии
+    new_columns = [
+        ("phone", "TEXT"),
+        ("company", "TEXT"),
+        ("address", "TEXT"),
+        ("inn", "TEXT")
+    ]
+    for col_name, col_type in new_columns:
+        try:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+            conn.commit()
+        except:
+            conn.rollback()
     
     # 2. Таблица Каталога товаров
     cursor.execute('''
@@ -161,14 +176,18 @@ def register():
         name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
+        phone = request.form.get('phone')
+        company = request.form.get('company')
+        address = request.form.get('address')
+        inn = request.form.get('inn')
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
         try:
             cursor.execute(
-                "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, %s)",
-                (name, email, password, 'client')
+                "INSERT INTO users (name, email, password, role, phone, company, address, inn) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (name, email, password, 'client', phone, company, address, inn)
             )
             conn.commit()
             cursor.close()
@@ -188,13 +207,19 @@ def client_dashboard():
         
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Получаем все товары из базы для динамических списков заказа
+        
+        # Получаем полные данные клиента из базы
+        cursor.execute("SELECT name, email, phone, company, address, inn FROM users WHERE email = %s", (session['user'],))
+        client_data = cursor.fetchone()
+        
+        # Товары для вкладки заказа
         cursor.execute("SELECT id, title, category, price, warehouse FROM products")
         products = cursor.fetchall()
+        
         cursor.close()
         conn.close()
         
-        return render_template('client.html', name=session['name'], email=session['user'], tab=tab, products=products)
+        return render_template('client.html', client=client_data, tab=tab, products=products)
     return redirect(url_for('home'))
 
 @app.route('/client/order_parts', methods=['POST'])
