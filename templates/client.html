@@ -107,48 +107,46 @@
             {% endif %}
 
             
-            <!-- Вкладка 3: Заявка / Расчет РВД -->
+            <!-- Вкладка 3: Заказ комплектующих из каталога -->
             {% if tab == 'calc' %}
             <div class="card-box">
-                <h2>🛠️ Быстрая заявка на изготовление РВД</h2>
-                <p style="color: #64748b; margin-bottom: 20px;">Укажите параметры необходимого рукава высокого давления, и мы подготовим расчет.</p>
+                <h2>📦 Заказ комплектующих (со склада)</h2>
+                <p style="color: #64748b; margin-bottom: 20px;">Выберите нужные позиции из базы данных, укажите количество и отправьте заявку в работу.</p>
                 
-                <form action="{{ url_for('order_hose') }}" method="POST" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                <form action="{{ url_for('order_parts') }}" method="POST" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
                     
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Тип рукава:</label>
-                        <select name="hose_type" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                            <option value="1SN (одна оплетка)">1SN (одна оплетка)</option>
-                            <option value="2SN (две оплетки)">2SN (две оплетки)</option>
-                            <option value="4SH (для тяжелых условий)">4SH (для тяжелых условий)</option>
-                        </select>
+                    <div id="order-items-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="order-row" style="display: flex; gap: 10px; align-items: center;">
+                            <select name="product_id[]" required style="flex: 3; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                <option value="">-- Выберите товар из базы --</option>
+                                {% for p in products %}
+                                <option value="{{ p[0] }}">{{ p[1] }} (Склад: {{ p[4] }}) — {{ p[3] }} тг</option>
+                                {% endfor %}
+                            </select>
+                            <input type="number" name="quantity[]" value="1" min="1" required style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" placeholder="Кол-во">
+                        </div>
                     </div>
             
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Длина рукава (в метрах):</label>
-                        <input type="text" name="length" placeholder="Например: 1.5 метра" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    </div>
+                    <button type="button" id="add-row-btn" style="background: #f1f5f9; color: #3b82f6; border: 1px dashed #3b82f6; padding: 8px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        + Добавить еще позицию
+                    </button>
             
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Фитинг (Сторона 1):</label>
-                        <input type="text" name="fitting1" placeholder="Например: DKOL M18x1.5" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    </div>
-            
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Фитинг (Сторона 2):</label>
-                        <input type="text" name="fitting2" placeholder="Например: DKOS M20x1.5 (под углом 90°)" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                    </div>
-            
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Комментарий / Особенности:</label>
-                        <textarea name="comment" rows="3" placeholder="Укажите рабочее давление или специфику техники..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
-                    </div>
-            
-                    <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s;">
-                        Отправить заявку на расчет
+                    <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+                        Отправить заказ комплектующих
                     </button>
                 </form>
             </div>
+            
+            <!-- Простой скрипт для добавления новых строк товаров в форму -->
+            <script>
+                document.getElementById('add-row-btn').addEventListener('click', function() {
+                    const container = document.getElementById('order-items-container');
+                    const firstRow = container.querySelector('.order-row');
+                    const newRow = firstRow.cloneNode(true);
+                    newRow.querySelector('input').value = '1';
+                    container.appendChild(newRow);
+                });
+            </script>
             {% endif %}
 
             <!-- Вкладка 4: Документы -->
