@@ -278,7 +278,7 @@ def admin_dashboard():
         cursor = conn.cursor()
         
         # Получаем пользователей со всеми новыми полями анкеты
-        cursor.execute("SELECT id, name, email, role, phone, company, address, inn FROM users")
+        cursor.execute("SELECT id, name, phone, message, created_at, status FROM messages ORDER BY created_at DESC")
         all_users = cursor.fetchall()
         
         # Получаем товары
@@ -360,6 +360,31 @@ def edit_product(product_id):
         cursor.close()
         conn.close()
     return redirect(url_for('admin_dashboard', tab='sklad'))
+
+@app.route('/update_request_status/<int:req_id>', methods=['POST'])
+def update_request_status(req_id):
+    if 'user' in session and session['role'] == 'admin':
+        new_status = request.form.get('status')
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Автоматически добавляем колонку, если ее вдруг еще нет в базе
+        cursor.execute("ALTER TABLE messages ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Новая'")
+        cursor.execute("UPDATE messages SET status = %s WHERE id = %s", (new_status, req_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    return redirect(url_for('admin_dashboard', tab='requests'))
+
+@app.route('/delete_request/<int:req_id>', methods=['POST'])
+def delete_request(req_id):
+    if 'user' in session and session['role'] == 'admin':
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM messages WHERE id = %s", (req_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    return redirect(url_for('admin_dashboard', tab='requests'))
 
 @app.route('/logout')
 def logout():
