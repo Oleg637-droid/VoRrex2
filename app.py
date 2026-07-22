@@ -189,6 +189,33 @@ def client_dashboard():
         return render_template('client.html', name=session['name'], email=session['user'], tab=tab)
     return redirect(url_for('home'))
 
+@app.route('/client/order_hose', methods=['POST'])
+def order_hose():
+    if 'user' in session and session['role'] == 'client':
+        hose_type = request.form.get('hose_type')     # Тип рукава (например, 1SN, 2SN)
+        length = request.form.get('length')           # Длина в метрах
+        fitting1 = request.form.get('fitting1')       # Фитинг с первого конца
+        fitting2 = request.form.get('fitting2')       # Фитинг со второго конца
+        comment = request.form.get('comment', '')     # Дополнительные пожелания
+        
+        # Формируем понятный текст заявки
+        user_name = session['name']
+        user_email = session['user']
+        full_message = f"[Заказ РВД] Тип: {hose_type}, Длина: {length}м, Фитинги: {fitting1} / {fitting2}. Комментарий: {comment} (Клиент: {user_name}, {user_email})"
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Сохраняем в таблицу messages, чтобы админ видел заявку во вкладке «Сообщения/Заявки»
+        cursor.execute(
+            "INSERT INTO messages (name, phone, message) VALUES (%s, %s, %s)",
+            (user_name, "Из кабинета клиента", full_message)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+    return redirect(url_for('client_dashboard', tab='calc'))
+
 @app.route('/admin')
 def admin_dashboard():
     if 'user' in session and session['role'] == 'admin':
