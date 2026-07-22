@@ -277,11 +277,11 @@ def admin_dashboard():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Получаем пользователей со всеми новыми полями анкеты
-        cursor.execute("SELECT id, name, phone, message, created_at, status FROM messages ORDER BY created_at DESC")
+        # 1. Получаем пользователей со всеми новыми полями анкеты
+        cursor.execute("SELECT id, name, email, role, phone, company, address, inn FROM users")
         all_users = cursor.fetchall()
         
-        # Получаем товары
+        # 2. Получаем товары
         cursor.execute("SELECT * FROM products")
         all_products = cursor.fetchall()
         
@@ -299,7 +299,12 @@ def admin_dashboard():
             
             tree_data[wh][parent][sub].append(p)
         
-        cursor.execute("SELECT id, name, phone, message, created_at FROM messages ORDER BY created_at DESC")
+        # 3. Автоматически создаем колонку status, если её ещё нет в базе
+        cursor.execute("ALTER TABLE messages ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Новая'")
+        conn.commit()
+
+        # 4. Получаем заявки (сообщения) вместе со статусом
+        cursor.execute("SELECT id, name, phone, message, created_at, status FROM messages ORDER BY created_at DESC")
         all_messages = cursor.fetchall()
         
         cursor.close()
