@@ -106,11 +106,48 @@
             </div>
             {% endif %}
 
+            
             <!-- Вкладка 3: Заявка / Расчет РВД -->
             {% if tab == 'calc' %}
             <div class="card-box">
                 <h2>🛠️ Быстрая заявка на изготовление РВД</h2>
-                <p style="color: #64748b;">Здесь клиент сможет выбрать параметры шланга и отправить заявку на сборку.</p>
+                <p style="color: #64748b; margin-bottom: 20px;">Укажите параметры необходимого рукава высокого давления, и мы подготовим расчет.</p>
+                
+                <form action="{{ url_for('order_hose') }}" method="POST" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                    
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Тип рукава:</label>
+                        <select name="hose_type" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            <option value="1SN (одна оплетка)">1SN (одна оплетка)</option>
+                            <option value="2SN (две оплетки)">2SN (две оплетки)</option>
+                            <option value="4SH (для тяжелых условий)">4SH (для тяжелых условий)</option>
+                        </select>
+                    </div>
+            
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Длина рукава (в метрах):</label>
+                        <input type="text" name="length" placeholder="Например: 1.5 метра" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    </div>
+            
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Фитинг (Сторона 1):</label>
+                        <input type="text" name="fitting1" placeholder="Например: DKOL M18x1.5" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    </div>
+            
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Фитинг (Сторона 2):</label>
+                        <input type="text" name="fitting2" placeholder="Например: DKOS M20x1.5 (под углом 90°)" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    </div>
+            
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Комментарий / Особенности:</label>
+                        <textarea name="comment" rows="3" placeholder="Укажите рабочее давление или специфику техники..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
+                    </div>
+            
+                    <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s;">
+                        Отправить заявку на расчет
+                    </button>
+                </form>
             </div>
             {% endif %}
 
