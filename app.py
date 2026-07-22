@@ -184,33 +184,50 @@ def register():
 @app.route('/client')
 def client_dashboard():
     if 'user' in session and session['role'] == 'client':
-        # Получаем выбранную вкладку (по умолчанию 'profile')
         tab = request.args.get('tab', 'profile')
-        return render_template('client.html', name=session['name'], email=session['user'], tab=tab)
-    return redirect(url_for('home'))
-
-@app.route('/client/order_hose', methods=['POST'])
-def order_hose():
-    if 'user' in session and session['role'] == 'client':
-        hose_type = request.form.get('hose_type')     # Тип рукава (например, 1SN, 2SN)
-        length = request.form.get('length')           # Длина в метрах
-        fitting1 = request.form.get('fitting1')       # Фитинг с первого конца
-        fitting2 = request.form.get('fitting2')       # Фитинг со второго конца
-        comment = request.form.get('comment', '')     # Дополнительные пожелания
-        
-        # Формируем понятный текст заявки
-        user_name = session['name']
-        user_email = session['user']
-        full_message = f"[Заказ РВД] Тип: {hose_type}, Длина: {length}м, Фитинги: {fitting1} / {fitting2}. Комментарий: {comment} (Клиент: {user_name}, {user_email})"
         
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Сохраняем в таблицу messages, чтобы админ видел заявку во вкладке «Сообщения/Заявки»
-        cursor.execute(
-            "INSERT INTO messages (name, phone, message) VALUES (%s, %s, %s)",
-            (user_name, "Из кабинета клиента", full_message)
-        )
-        conn.commit()
+        # Получаем все товары из базы для динамических списков заказа
+        cursor.execute("SELECT id, title, category, price, warehouse FROM products")
+        products = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        return render_template('client.html', name=session['name'], email=session['user'], tab=tab, products=products)
+    return redirect(url_for('home'))
+
+@app.route('/client/order_parts', methods=['POST'])
+def order_parts():
+    if 'user' in session and session['role'] == 'client':
+        # Получаем списки выбранных товаров и их количество из формы
+        product_ids = request.form.getlist('product_id[]')
+        quantities = request.form.getlist('quantity[]')
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        order_details = []
+        for p_id, qty in zip(product_ids, quantities):
+            if p_id and int(qty) > 0:
+                # Узнаем название товара из базы по его ID
+                cursor.execute("SELECT title FROM products WHERE id = %s", (p_id,))
+                prod = cursor.fetchone()
+                if prod:
+                    order_details.append(f"{prod[0]} — {qty} шт.")
+        
+        if order_details:
+            items_str = ", ".join(order_details)
+            user_name = session['name']
+            user_email = session['user']
+            full_message = f"[Заказ комплектующих] Состав: {items_str} (Клиент: {user_name}, {user_email})"
+            
+            cursor.execute(
+                "INSERT INTO messages (name, phone, message) VALUES (%s, %s, %s)",
+                (user_name, "Из кабинета (комплектующие)", full_message)
+            )
+            conn.commit()
+            
         cursor.close()
         conn.close()
         
