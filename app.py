@@ -277,18 +277,19 @@ def admin_dashboard():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT id, name, email, role FROM users")
+        # Получаем пользователей со всеми новыми полями анкеты
+        cursor.execute("SELECT id, name, email, role, phone, company, address, inn FROM users")
         all_users = cursor.fetchall()
         
         # Получаем товары
         cursor.execute("SELECT * FROM products")
         all_products = cursor.fetchall()
         
-        # Готовим структуру для дерева: { "Склад": { "Родитель": { "Подкатегория": [товары] } } }
+        # Готовим структуру для дерева склада
         tree_data = {}
         for p in all_products:
             wh = p[6] if p[6] else 'Офис'
-            cat_path = p[2].split('/') # Разделяем категорию (например, "Шланги/2SN")
+            cat_path = p[2].split('/')
             parent = cat_path[0]
             sub = cat_path[1] if len(cat_path) > 1 else "Прочее"
             
