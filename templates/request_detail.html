@@ -86,11 +86,9 @@
                     <tr>
                         <td style="padding: 10px;">{{ item[1] }}</td>
                         <td style="padding: 10px;">{{ item[2] }} шт.</td>
-                        <td style="padding: 10px;">
-                            <!-- Форма сохранения фактического количества прямо в строке таблицы -->
-                            <form action="{{ url_for('update_fact_qty', req_id=req[0], item_id=item[0]) }}" method="POST" style="display: flex; gap: 10px; margin: 0; padding: 0; background: none;">
-                                <input type="number" name="fact_quantity" value="{{ item[5] if item[5] is not none else '' }}" placeholder="Факт" style="width: 80px; padding: 5px; border-radius: 4px; border: 1px solid #4e6d8c; background: #34495e; color: white;">
-                                <button type="submit" style="padding: 5px 10px; font-size: 0.8rem; background: #1abc9c; border: none; border-radius: 4px; cursor: pointer; color: white;">Ок</button>
+                        <td style="padding: 10px; text-align: center;">
+                            <form action="{{ url_for('update_fact_qty', req_id=req[0], item_id=item[0]) }}" method="POST" style="margin: 0; padding: 0; background: none;">
+                                <input type="checkbox" name="is_collected" value="1" {% if item[5] %}checked{% endif %} onchange="this.form.submit()" style="width: 20px; height: 20px; cursor: pointer;">
                             </form>
                         </td>
                         <td style="padding: 10px;">{{ item[3] }} ₸</td>
