@@ -90,6 +90,7 @@ def init_db():
             conn.rollback()
 
     # 4. Таблица товаров, привязанных к конкретной заявке (для чекбоксов и сборки)
+    # Таблица товаров, привязанных к конкретной заявке
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS request_items (
             id SERIAL PRIMARY KEY,
@@ -97,10 +98,18 @@ def init_db():
             product_id INT,
             product_name VARCHAR(255),
             quantity INT DEFAULT 1,
+            fact_quantity INT, -- Фактическое наличие / выданное количество
             price NUMERIC(10, 2),
             is_checked BOOLEAN DEFAULT FALSE
         )
     ''')
+    
+    # Безопасно добавляем колонку, если таблица уже существовала
+    try:
+        cursor.execute("ALTER TABLE request_items ADD COLUMN fact_quantity INT")
+        conn.commit()
+    except:
+        conn.rollback()
 
     # 5. Таблица для прикрепленных файлов (документы, сканы, фото)
     cursor.execute('''
