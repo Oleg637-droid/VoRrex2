@@ -149,6 +149,114 @@
                 line-height: 1.4 !important;
                 word-break: break-word !important;
             }
+
+            /* Стили для современных карточек заказов */
+            .orders-list {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .order-card-modern {
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+                transition: all 0.2s ease;
+            }
+            .order-card-modern:hover {
+                border-shadow: 0 4px 6px rgba(0,0,0,0.04);
+                border-color: #cbd5e1;
+            }
+            .order-header {
+                flex-direction: column;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                border-bottom: 1px solid #f1f5f9;
+                padding-bottom: 12px;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .order-info-group {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+            .order-id {
+                font-weight: 700;
+                color: #0f172a;
+                font-size: 1.05rem;
+            }
+            .order-date {
+                font-size: 0.85rem;
+                color: #64748b;
+            }
+            /* Статусы заказов (бейджи) */
+            .order-status {
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: capitalize;
+            }
+            .status-new { background: #eff6ff; color: #3b82f6; }
+            .status-process { background: #fef3c7; color: #d97706; }
+            .status-success { background: #f0fdf4; color: #16a34a; }
+            .status-default { background: #f1f5f9; color: #475569; }
+    
+            .order-items-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .order-items-title {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .order-items-list {
+                list-style: none;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .order-item-row {
+                flex-direction: row;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #f8fafc;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 0.95rem;
+            }
+            .item-name {
+                color: #334155;
+                font-weight: 500;
+            }
+            .item-qty {
+                font-weight: 600;
+                color: #0f172a;
+            }
+            .qty-old {
+                color: #ef4444;
+                margin-right: 6px;
+                font-size: 0.85rem;
+            }
+            .qty-new {
+                color: #16a34a;
+            }
+            .empty-orders {
+                text-align: center;
+                padding: 40px 20px;
+                background: #f8fafc;
+                border-radius: 12px;
+                border: 2px dashed #e2e8f0;
+            }
         }
         
     </style>
@@ -227,26 +335,64 @@
 
             <!-- Вкладка 2: Заказы -->
             {% if tab == 'orders' %}
-                {% for msg in client_messages %}
-                    <div class="order-card">
-                        <p>Заявка от {{ msg[2] }} — Статус: <strong>{{ msg[3] }}</strong></p>
-                        <ul>
-                            {% for item in order_items_dict.get(msg[0], []) %}
-                                <li>
-                                    {{ item.title }} — 
-                                    {% if item.fact_quantity is not none and item.fact_quantity != item.quantity %}
-                                        <!-- Если количество изменено админом -->
-                                        <del style="color: red;">{{ item.quantity }} шт.</del> 
-                                        <strong style="color: green;">{{ item.fact_quantity }} шт.</strong>
-                                    {% else %}
-                                        <!-- Если количество не менялось -->
-                                        {{ item.quantity }} шт.
+            <div class="card-box">
+                <h2>📦 Мои заказы и заявки</h2>
+                <p style="color: #64748b; margin-bottom: 25px; font-size: 0.95rem;">История ваших запросов и актуальный статус обработки на складе.</p>
+
+                {% if client_messages %}
+                    <div class="orders-list">
+                        {% for msg in client_messages %}
+                            <div class="order-card-modern">
+                                <!-- Верхняя строка карточки: Дата и Статус -->
+                                <div class="order-header">
+                                    <div class="order-info-group">
+                                        <span class="order-id">Заявка №{{ msg[0] }}</span>
+                                        <span class="order-date">📅 {{ msg[2] }}</span>
+                                    </div>
+                                    <!-- Окрашиваем статус в зависимости от текста -->
+                                    {% set status_class = 'status-default' %}
+                                    {% if 'новый' in msg[3]|lower or 'принят' in msg[3]|lower %}
+                                        {% set status_class = 'status-new' %}
+                                    {% elif 'выполнен' in msg[3]|lower or 'готов' in msg[3]|lower %}
+                                        {% set status_class = 'status-success' %}
+                                    {% elif 'в работе' in msg[3]|lower or 'обработ' in msg[3]|lower %}
+                                        {% set status_class = 'status-process' %}
                                     {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
+                                    <span class="order-status {{ status_class }}">{{ msg[3] }}</span>
+                                </div>
+
+                                <!-- Список товаров в заказе -->
+                                <div class="order-items-wrapper">
+                                    <div class="order-items-title">Состав заказа:</div>
+                                    <ul class="order-items-list">
+                                        {% for item in order_items_dict.get(msg[0], []) %}
+                                            <li class="order-item-row">
+                                                <span class="item-name">🔹 {{ item.title }}</span>
+                                                <span class="item-qty">
+                                                    {% if item.fact_quantity is not none and item.fact_quantity != item.quantity %}
+                                                        <!-- Если менеджер изменил количество -->
+                                                        <del class="qty-old">{{ item.quantity }} шт.</del> 
+                                                        <strong class="qty-new" title="Скорректировано менеджером">{{ item.fact_quantity }} шт.</strong>
+                                                    {% else %}
+                                                        {{ item.quantity }} шт.
+                                                    {% endif %}
+                                                </span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
+                {% else %}
+                    <!-- Состояние, если заказов еще нет -->
+                    <div class="empty-orders">
+                        <span style="font-size: 3rem;">📭</span>
+                        <p style="font-weight: 600; color: #0f172a; margin-top: 10px;">У вас пока нет активных заказов</p>
+                        <p style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">Перейдите во вкладку «Заявка на РВД», чтобы сформировать первый заказ со склада.</p>
+                    </div>
+                {% endif %}
+            </div>
             {% endif %}
 
             
