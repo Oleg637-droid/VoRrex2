@@ -259,28 +259,56 @@ def client_dashboard():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Получаем полные данные клиента из базы
-        cursor.execute("SELECT name, email, phone, company, address, inn FROM users WHERE email = %s", (session['user'],))
+        # Данные клиента
+        cursor.execute("SELECT id, name, email, phone, company, address, inn FROM users WHERE email = %s", (session['user'],))
         client_data = cursor.fetchone()
         
-        # Товары для вкладки заказа
+        if not client_data:
+            cursor.close()
+            conn.close()
+            return redirect(url_for('logout'))
+            
+        user_id = client_data[0]
+
+        # Товары для каталога
         cursor.execute("SELECT id, title, category, price, warehouse FROM products")
         products = cursor.fetchall()
-        
+
+        # История заказов/заявок клиента вместе с позициями
+        cursor.execute("SELECT id, message, created_at, status FROM messages WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+        client_messages = cursor.fetchall()
+
+        # Получаем товары по всем заявкам этого пользователя
+        cursor.execute('''
+            ri.request_id, ri.product_name, ri.quantity, ri.fact_quantity 
+            FROM request_items ri
+            JOIN messages m ON ri.request_id = m.id
+            WHERE m.user_id = %s
+        ''', (user_id,))
+        # Группируем по id заявки для удобства в шаблоне
+        order_items_dict = {}
+        for row in cursor.fetchall():
+            req_id = row[0]
+            if req_id not in order_items_dict:
+                order_items_dict[req_id] = []
+            order_items_dict[req_id].append({
+                'title': row[1],
+                'quantity': row[2],
+                'fact_quantity': row[3]
+            })
+
         cursor.close()
         conn.close()
         
-        # Защита, если вдруг пользователя нет в базе
-        if not client_data:
-            return redirect(url_for('logout'))
-            
         return render_template(
             'client.html', 
             client=client_data, 
-            name=client_data[0],   # Передаем имя для шапки и аватарки
-            email=client_data[1],  # Передаем email
+            name=client_data[1], 
+            email=client_data[2], 
             tab=tab, 
-            products=products
+            products=products,
+            client_messages=client_messages,
+            order_items_dict=order_items_dict
         )
     return redirect(url_for('home'))
 
