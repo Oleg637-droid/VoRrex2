@@ -257,6 +257,149 @@
                 border-radius: 12px;
                 border: 2px dashed #e2e8f0;
             }
+            /* Стили формы заказа в ЛК */
+            .order-form-container {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .order-rows-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .order-row-card {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 15px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                position: relative;
+                transition: all 0.2s ease;
+            }
+            .order-row-card:hover {
+                border-color: #cbd5e1;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+            .row-fields {
+                display: flex;
+                gap: 15px;
+                flex: 1;
+                width: 100%;
+            }
+            .field-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .field-wrapper label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #64748b;
+                text-transform: uppercase;
+            }
+            .select-field {
+                flex: 4;
+            }
+            .qty-field {
+                flex: 1;
+                min-width: 90px;
+            }
+            .form-control-styled {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 0.95rem;
+                background: white;
+                color: #0f172a;
+                outline: none;
+                transition: border-color 0.2s;
+            }
+            .form-control-styled:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            /* Кнопка удаления отдельной позиции */
+            .btn-remove-row {
+                background: #ffeeef;
+                color: #ef4444;
+                border: none;
+                width: 32px;
+                height: 32px;
+                border-radius: 6px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                transition: background 0.2s;
+                flex-shrink: 0;
+                margin-top: 18px; /* Выравнивание по центру полей с учетом метки */
+            }
+            .btn-remove-row:hover {
+                background: #fecdcd;
+            }
+    
+            /* Кнопки добавления строки и отправки */
+            .btn-add-row {
+                background: #f1f5f9;
+                color: #3b82f6;
+                border: 1px dashed #cbd5e1;
+                padding: 12px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: all 0.2s;
+            }
+            .btn-add-row:hover {
+                background: #eff6ff;
+                border-color: #3b82f6;
+            }
+            .btn-submit-order {
+                background: #3b82f6;
+                color: white;
+                border: none;
+                padding: 14px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background 0.2s, transform 0.1s;
+                box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+            }
+            .btn-submit-order:hover {
+                background: #2563eb;
+            }
+    
+            /* Мобильная адаптация для строк формы */
+            @media screen and (max-width: 768px) {
+                .order-row-card {
+                    flex-direction: column;
+                    align-items: stretch;
+                    padding: 12px;
+                    gap: 10px;
+                }
+                .row-fields {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                .qty-field {
+                    width: 100%;
+                }
+                .btn-remove-row {
+                    width: 100%;
+                    margin-top: 0;
+                    height: 36px;
+                }
+            }
         }
         
     </style>
