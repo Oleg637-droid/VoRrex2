@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заявка #{{ req[0] }} — Панель управления</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { background: #1a252f; color: #ecf0f1; font-family: sans-serif; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #2c3e50; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #3498db; text-decoration: none; font-weight: bold; }
+        .back-btn:hover { text-decoration: underline; }
+        .section { margin-bottom: 30px; border-bottom: 1px solid #34495e; padding-bottom: 20px; }
+        h2, h3 { color: #fff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border-bottom: 1px solid #34495e; text-align: left; font-size: 0.9rem; }
+        th { background: #2980b9; color: white; }
+        .btn { background: #2980b9; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn:hover { background: #3498db; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        .contact-box { background: #34495e; padding: 15px; border-radius: 6px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('admin_dashboard', tab='requests') }}" class="back-btn">← Назад к списку заявок</a>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;" class="section">
+            <div>
+                <h2>Заявка #{{ req[0] }} от {{ req[4] }}</h2>
+                <p style="color: #95a5a6; margin: 5px 0;">Сумма заказа: <strong style="color: #2ecc71;">{{ req[7] if req[7] else '0' }} тг</strong></p>
+            </div>
+            <div>
+                <!-- Смена статуса заявки -->
+                <form action="{{ url_for('update_request_status', req_id=req[0]) }}" method="POST" style="display: inline-block;">
+                    <label style="font-size: 0.85rem; color: #bdc3c7;">Статус:</label>
+                    <select name="status" onchange="this.form.submit()" style="padding: 8px; border-radius: 4px; background: #34495e; color: white; border: 1px solid #4e6d8c;">
+                        <option value="Новая" {% if req[5] == 'Новая' %}selected{% endif %}>🟡 Новая</option>
+                        <option value="В работе" {% if req[5] == 'В работе' %}selected{% endif %}>🔵 В работе</option>
+                        <option value="Выполнена" {% if req[5] == 'Выполнена' %}selected{% endif %}>🟢 Выполнена</option>
+                        <option value="Отменена" {% if req[5] == 'Отменена' %}selected{% endif %}>🔴 Отменена</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Данные клиента и связь с ним -->
+        <div class="section">
+            <h3>👤 Данные клиента и связь</h3>
+            <div class="contact-box">
+                <div><strong>Имя:</strong> {{ req[1] }}</div>
+                <div><strong>Телефон:</strong> {{ req[2] if req[2] else 'Не указан' }}</div>
+                <div><strong>Email:</strong> {{ req[6] if req[6] else 'Не указан' }}</div>
+                <div style="margin-left: auto; display: flex; gap: 10px;">
+                    {% if req[2] %}
+                    <a href="https://wa.me/{{ req[2]|replace('+', '')|replace(' ', '')|replace('-', '') }}" target="_blank" class="btn" style="background: #27ae60;">💬 Написать в WhatsApp</a>
+                    {% endif %}
+                    {% if req[6] %}
+                    <a href="mailto:{{ req[6] }}" class="btn">✉️ Email-письмо</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% if req[3] %}
+            <div style="margin-top: 15px; background: #34495e; padding: 12px; border-radius: 6px;">
+                <strong style="font-size: 0.85rem; color: #95a5a6;">Сообщение от клиента:</strong>
+                <p style="margin: 5px 0 0 0; color: #ecf0f1;">{{ req[3] }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Товары со списком и галочками -->
+        <div class="section">
+            <h3>📦 Товары в заявке (сборка / проверка)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px; text-align: center;">Сборка</th>
+                        <th>Наименование товара</th>
+                        <th>Количество</th>
+                        <th>Цена</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td style="text-align: center;">
+                            <form action="{{ url_for('update_request_item_check', req_id=req[0], item_id=item[0]) }}" method="POST">
+                                <input type="checkbox" name="is_checked" {% if item[4] %}checked{% endif %} onchange="this.form.submit()" style="transform: scale(1.3); cursor: pointer;">
+                            </form>
+                        </td>
+                        <td style="{% if item[4] %}text-decoration: line-through; color: #95a5a6;{% endif %}">{{ item[1] }}</td>
+                        <td>{{ item[2] }} шт.</td>
+                        <td>{{ item[3] }} тг</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #95a5a6; padding: 15px;">Товары к этой заявке не прикреплены</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Документы, фото и сканы -->
+        <div class="section">
+            <h3>📎 Прикрепленные документы и сканы</h3>
+            <ul style="list-style: none; padding: 0; margin-bottom: 15px;">
+                {% for file in files %}
+                <li style="display: flex; justify-content: space-between; align-items: center; background: #34495e; padding: 10px 15px; margin-bottom: 8px; border-radius: 4px;">
+                    <a href="{{ file[2] }}" target="_blank" style="color: #3498db; text-decoration: none; font-weight: 500;">📄 {{ file[1] }}</a>
+                    <form action="{{ url_for('delete_request_file', req_id=req[0], file_id=file[0]) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Удалить файл?');">
+                        <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;">Удалить</button>
+                    </form>
+                </li>
+                {% else %}
+                <li style="color: #95a5a6; font-size: 0.9rem;">Нет прикрепленных файлов</li>
+                {% endfor %}
+            </ul>
+
+            <!-- Форма загрузки нового файла -->
+            <form action="{{ url_for('upload_request_file', req_id=req[0]) }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center; background: #34495e; padding: 15px; border-radius: 6px;">
+                <input type="file" name="file" required style="color: #bdc3c7;">
+                <button type="submit" class="btn">Загрузить документ/скан</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
