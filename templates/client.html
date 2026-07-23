@@ -400,6 +400,49 @@
                     height: 36px;
                 }
             }
+            /* Стили выпадающего списка живого поиска */
+            .search-dropdown-results {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 1px solid #cbd5e1;
+                border-radius: 0 0 8px 8px;
+                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+                max-height: 250px;
+                overflow-y: auto;
+                z-index: 1000;
+                margin-top: 2px;
+            }
+            .search-result-item {
+                padding: 10px 14px;
+                border-bottom: 1px solid #f1f5f9;
+                cursor: pointer;
+                transition: background 0.15s;
+            }
+            .search-result-item:last-child {
+                border-bottom: none;
+            }
+            .search-result-item:hover {
+                background: #eff6ff;
+            }
+            .res-title {
+                font-size: 0.9rem;
+                color: #0f172a;
+                font-weight: 500;
+            }
+            .res-meta {
+                font-size: 0.75rem;
+                color: #64748b;
+                margin-top: 2px;
+            }
+            .search-no-results {
+                padding: 12px;
+                text-align: center;
+                font-size: 0.85rem;
+                color: #64748b;
+            }
         }
         
     </style>
@@ -540,11 +583,10 @@
 
             
             <!-- Вкладка 3: Заказ комплектующих из каталога -->
-            <!-- Вкладка 3: Заказ комплектующих из каталога -->
             {% if tab == 'calc' %}
             <div class="card-box">
                 <h2>🛠️ Новая заявка на комплектующие</h2>
-                <p style="color: #64748b; margin-bottom: 25px; font-size: 0.95rem;">Выберите нужные позиции со склада, укажите необходимое количество и отправьте запрос в работу.</p>
+                <p style="color: #64748b; margin-bottom: 25px; font-size: 0.95rem;">База содержит более 10 000 наименований. Начните вводить артикул или название детали для быстрого поиска.</p>
                 
                 <form action="{{ url_for('order_parts') }}" method="POST" class="order-form-container">
                     
@@ -552,21 +594,26 @@
                     <div id="order-items-container" class="order-rows-list">
                         <div class="order-row-card">
                             <div class="row-fields">
-                                <div class="field-wrapper select-field">
-                                    <label>Наименование товара / позиции</label>
-                                    <select name="product_id[]" required class="form-control-styled">
-                                        <option value="">-- Выберите товар из базы --</option>
-                                        {% for p in products %}
-                                        <option value="{{ p[0] }}">{{ p[1] }} (Доступно: {{ p[4] }} шт.) — {{ p[3] }} тг</option>
-                                        {% endfor %}
-                                    </select>
+                                <div class="field-wrapper select-field" style="position: relative;">
+                                    <label>Поиск по каталогу (название / артикул)</label>
+                                    
+                                    <!-- Инпут для живого поиска -->
+                                    <input type="text" class="form-control-styled product-search-input" placeholder="🔍 Введите название или артикул (например, РВД 2SN)..." autocomplete="off">
+                                    
+                                    <!-- Скрытый инпут, который уйдет на сервер с ID выбранного товара -->
+                                    <input type="hidden" name="product_id[]" class="product-id-hidden" required>
+                                    
+                                    <!-- Выпадающий список с результатами поиска -->
+                                    <div class="search-dropdown-results" style="display: none;"></div>
                                 </div>
+                                
                                 <div class="field-wrapper qty-field">
                                     <label>Кол-во</label>
                                     <input type="number" name="quantity[]" value="1" min="1" required class="form-control-styled">
                                 </div>
                             </div>
-                            <!-- Кнопка удаления строки (скрыта для первой строки) -->
+                            
+                            <!-- Кнопка удаления строки -->
                             <button type="button" class="btn-remove-row" title="Удалить позицию" style="display: none;">✕</button>
                         </div>
                     </div>
@@ -582,19 +629,87 @@
                     </button>
                 </form>
             </div>
-            
-            <!-- Продвинутый скрипт для динамического добавления/удаления строк -->
+
+            <!-- Глобальный массив товаров из базы для быстрого поиска на клиенте без перезагрузки -->
             <script>
+                const ALL_PRODUCTS = [
+                    {% for p in products %}
+                    { id: "{{ p[0] }}", title: "{{ p[1] }}", price: "{{ p[3] }}", stock: "{{ p[4] }}" },
+                    {% endfor %}
+                ];
+
+                // Функция инициализации живого поиска для строки
+                function initProductSearch(rowElement) {
+                    const searchInput = rowElement.querySelector('.product-search-input');
+                    const hiddenInput = rowElement.querySelector('.product-id-hidden');
+                    const dropdown = rowElement.querySelector('.search-dropdown-results');
+
+                    searchInput.addEventListener('input', function() {
+                        const query = this.value.toLowerCase().trim();
+                        hiddenInput.value = ""; // Сбрасываем ID пока пользователь не выберет из списка
+                        
+                        if (query.length < 2) {
+                            dropdown.style.display = 'none';
+                            return;
+                        }
+
+                        // Фильтруем массив (до 50 результатов для скорости)
+                        const filtered = ALL_PRODUCTS.filter(p => p.title.toLowerCase().includes(query)).slice(0, 50);
+
+                        if (filtered.length === 0) {
+                            dropdown.innerHTML = '<div class="search-no-results">Ничего не найдено</div>';
+                            dropdown.style.display = 'block';
+                            return;
+                        }
+
+                        let html = '';
+                        filtered.forEach(p => {
+                            html += `<div class="search-result-item" data-id="${p.id}" data-title="${p.title}">
+                                <div class="res-title">${p.title}</div>
+                                <div class="res-meta">Склад: <strong>${p.stock} шт.</strong> | Цена: <strong>${p.price} тг</strong></div>
+                            </div>`;
+                        });
+
+                        dropdown.innerHTML = html;
+                        dropdown.style.display = 'block';
+                    });
+
+                    // Клик по элементу из выпадающего списка
+                    dropdown.addEventListener('click', function(e) {
+                        const item = e.target.closest('.search-result-item');
+                        if (item) {
+                            searchInput.value = item.getAttribute('data-title');
+                            hiddenInput.value = item.getAttribute('data-id');
+                            dropdown.style.display = 'none';
+                        }
+                    });
+
+                    // Закрытие выпадашки при клике вне её
+                    document.addEventListener('click', function(e) {
+                        if (!rowElement.contains(e.target)) {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+                }
+
+                // Инициализируем для первой строки при загрузке
+                document.addEventListener('DOMContentLoaded', function() {
+                    initProductSearch(document.querySelector('.order-row-card'));
+                });
+
+                // Добавление новой строки
                 document.getElementById('add-row-btn').addEventListener('click', function() {
                     const container = document.getElementById('order-items-container');
                     const firstRow = container.querySelector('.order-row-card');
                     const newRow = firstRow.cloneNode(true);
                     
-                    // Очищаем значение в новом селекторе и сбрасываем количество на 1
-                    newRow.querySelector('select').value = '';
+                    // Очищаем поля в новой строке
+                    newRow.querySelector('.product-search-input').value = '';
+                    newRow.querySelector('.product-id-hidden').value = '';
+                    newRow.querySelector('.search-dropdown-results').style.display = 'none';
                     newRow.querySelector('input[type="number"]').value = '1';
                     
-                    // Показываем кнопку удаления для новых строк
+                    // Показываем кнопку удаления
                     const removeBtn = newRow.querySelector('.btn-remove-row');
                     removeBtn.style.display = 'flex';
                     removeBtn.addEventListener('click', function() {
@@ -602,6 +717,7 @@
                     });
                     
                     container.appendChild(newRow);
+                    initProductSearch(newRow); // Подключаем живой поиск к новой строке
                 });
             </script>
             {% endif %}
