@@ -23,8 +23,7 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 1. Таблица пользователей (в Postgres синтаксис немного отличается: SERIAL вместо AUTOINCREMENT)
-    # В функции init_db() для таблицы users
+    # 1. Таблица пользователей
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -35,7 +34,6 @@ def init_db():
         )
     ''')
     
-    # Безопасно добавляем новые поля анкеты в таблицу users при их отсутствии
     new_columns = [
         ("phone", "TEXT"),
         ("company", "TEXT"),
@@ -64,7 +62,9 @@ def init_db():
         cursor.execute("ALTER TABLE products ADD COLUMN warehouse TEXT DEFAULT 'Офис'")
         conn.commit()
     except:
-        conn.rollback() # Если колонка уже есть, просто пропускаем ошибку
+        conn.rollback()
+
+    # 3. Таблица заявок (messages) с дополнительными полями
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
             id SERIAL PRIMARY KEY,
@@ -72,6 +72,44 @@ def init_db():
             phone TEXT NOT NULL,
             message TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Безопасно добавляем колонки для полноценной заявки
+    msg_columns = [
+        ("status", "VARCHAR(50) DEFAULT 'Новая'"),
+        ("user_id", "INT"),
+        ("email", "VARCHAR(255)"),
+        ("total_price", "NUMERIC(10, 2) DEFAULT 0")
+    ]
+    for col_name, col_type in msg_columns:
+        try:
+            cursor.execute(f"ALTER TABLE messages ADD COLUMN IF NOT EXISTS {col_name} {col_type}")
+            conn.commit()
+        except:
+            conn.rollback()
+
+    # 4. Таблица товаров, привязанных к конкретной заявке (для чекбоксов и сборки)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS request_items (
+            id SERIAL PRIMARY KEY,
+            request_id INT REFERENCES messages(id) ON DELETE CASCADE,
+            product_id INT,
+            product_name VARCHAR(255),
+            quantity INT DEFAULT 1,
+            price NUMERIC(10, 2),
+            is_checked BOOLEAN DEFAULT FALSE
+        )
+    ''')
+
+    # 5. Таблица для прикрепленных файлов (документы, сканы, фото)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS request_files (
+            id SERIAL PRIMARY KEY,
+            request_id INT REFERENCES messages(id) ON DELETE CASCADE,
+            file_name VARCHAR(255),
+            file_path VARCHAR(512),
+            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
     
