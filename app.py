@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import os
 import psycopg2  # Вместо sqlite3 используем psycopg2 для PostgreSQL
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = 'static/uploads/requests'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key-change-me-later'
@@ -390,6 +394,76 @@ def delete_request(req_id):
         cursor.close()
         conn.close()
     return redirect(url_for('admin_dashboard', tab='requests'))
+
+@app.route('/admin/request/<int:req_id>')
+def view_request_detail(req_id):
+    if 'user' in session and session['role'] == 'admin':
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Получаем данные заявки
+        cursor.execute("SELECT id, name, phone, message, created_at, status, email, total_price FROM messages WHERE id = %s", (req_id,))
+        req = cursor.fetchone()
+        
+        if not req:
+            cursor.close()
+            conn.close()
+            return redirect(url_for('admin_dashboard', tab='requests'))
+            
+        # Получаем привязанные товары
+        cursor.execute("SELECT id, product_name, quantity, price, is_checked FROM request_items WHERE request_id = %s", (req_id,))
+        items = cursor.fetchall()
+        
+        # Получаем прикрепленные файлы
+        cursor.execute("SELECT id, file_name, file_path, uploaded_at FROM request_files WHERE request_id = %s", (req_id,))
+        files = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return render_template('request_detail.html', req=req, items=items, files=files)
+    return redirect(url_for('home'))
+
+@app.route('/admin/request/<int:req_id>/update_item/<int:item_id>', methods=['POST'])
+def update_request_item_check(req_id, item_id):
+    if 'user' in session and session['role'] == 'admin':
+        is_checked = 'is_checked' in request.form
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE request_items SET is_checked = %s WHERE id = %s AND request_id = %s", (is_checked, item_id, req_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    return redirect(url_for('view_request_detail', req_id=req_id))
+
+@app.route('/admin/request/<int:req_id>/upload_file', methods=['POST'])
+def upload_request_file(req_id):
+    if 'user' in session and session['role'] == 'admin':
+        file = request.files.get('file')
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(UPLOAD_FOLDER, f"{req_id}_{filename}")
+            file.save(file_path)
+            
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO request_files (request_id, file_name, file_path) VALUES (%s, %s, %s)", 
+                           (req_id, filename, f"/{file_path}"))
+            conn.commit()
+            cursor.close()
+            conn.close()
+    return redirect(url_for('view_request_detail', req_id=req_id))
+
+@app.route('/admin/request/<int:req_id>/delete_file/<int:file_id>', methods=['POST'])
+def delete_request_file(req_id, file_id):
+    if 'user' in session and session['role'] == 'admin':
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM request_files WHERE id = %s AND request_id = %s", (file_id, req_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    return redirect(url_for('view_request_detail', req_id=req_id))
 
 @app.route('/logout')
 def logout():
