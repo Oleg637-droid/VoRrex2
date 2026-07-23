@@ -616,6 +616,161 @@
                     flex-direction: column !important;
                 }
             }
+            /* Панель фильтров и категорий в модалке */
+            .catalog-controls {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 15px;
+            }
+            .categories-tabs {
+                display: flex;
+                gap: 8px;
+                overflow-x: auto;
+                padding-bottom: 5px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .cat-tab {
+                background: #f1f5f9;
+                color: #475569;
+                border: 1px solid #e2e8f0;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all 0.2s;
+            }
+            .cat-tab:hover {
+                background: #e2e8f0;
+            }
+            .cat-tab.active {
+                background: #3b82f6;
+                color: white;
+                border-color: #3b82f6;
+            }
+    
+            /* Исправленная сетка карточек с фиксированной высотой элементов */
+            .modal-products-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 15px;
+                overflow-y: auto;
+                padding: 5px;
+                flex: 1;
+            }
+            .catalog-item-card {
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+                transition: all 0.2s ease;
+            }
+            .catalog-item-card:hover {
+                border-color: #cbd5e1;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                transform: translateY(-2px);
+            }
+            .catalog-item-img {
+                width: 100%;
+                height: 150px;
+                background: #f8fafc;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                border-bottom: 1px solid #f1f5f9;
+            }
+            .catalog-item-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain; /* Картинка не обрезается, а аккуратно вписывается */
+                padding: 10px;
+            }
+            .catalog-item-info {
+                padding: 12px;
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                justify-content: space-between;
+            }
+            .catalog-item-title {
+                font-weight: 600;
+                font-size: 0.95rem;
+                color: #0f172a;
+                margin-bottom: 4px;
+                line-height: 1.3;
+            }
+            .catalog-item-desc {
+                font-size: 0.75rem;
+                color: #64748b;
+                margin-bottom: 10px;
+                line-height: 1.3;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .catalog-item-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                font-size: 0.85rem;
+                border-top: 1px solid #f8fafc;
+                padding-top: 8px;
+            }
+            .catalog-item-price {
+                font-weight: 700;
+                color: #2563eb;
+            }
+            .catalog-item-stock {
+                color: #64748b;
+                font-size: 0.75rem;
+            }
+            .btn-select-this-product {
+                background: #eff6ff;
+                color: #2563eb;
+                border: 1px solid #dbeafe;
+                padding: 8px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                width: 100%;
+                text-align: center;
+            }
+            .btn-select-this-product:hover {
+                background: #3b82f6;
+                color: white;
+                border-color: #3b82f6;
+            }
+    
+            @media screen and (max-width: 768px) {
+                .modal-products-grid {
+                    grid-template-columns: 1fr;
+                }
+                .catalog-item-card {
+                    flex-direction: row;
+                    height: 110px;
+                }
+                .catalog-item-img {
+                    width: 110px;
+                    height: 100%;
+                    flex-shrink: 0;
+                }
+                .catalog-item-info {
+                    padding: 10px;
+                }
+                .catalog-item-desc {
+                    display: none;
+                }
+            }
         }
         
     </style>
@@ -759,7 +914,7 @@
             {% if tab == 'calc' %}
             <div class="card-box">
                 <h2>🛠️ Новая заявка на комплектующие</h2>
-                <p style="color: #64748b; margin-bottom: 25px; font-size: 0.95rem;">Выберите позиции из каталога по изображениям или найдите их по названию.</p>
+                <p style="color: #64748b; margin-bottom: 25px; font-size: 0.95rem;">Выберите позиции из каталога по категориям или воспользуйтесь визуальным поиском.</p>
                 
                 <form action="{{ url_for('order_parts') }}" method="POST" class="order-form-container">
                     
@@ -770,12 +925,9 @@
                                 <div class="field-wrapper select-field">
                                     <label>Выбранный товар</label>
                                     <div style="display: flex; gap: 10px;">
-                                        <!-- Отображение выбранного товара -->
                                         <input type="text" class="form-control-styled selected-product-display" placeholder="Товар не выбран..." readonly required style="background: #f8fafc; cursor: pointer;">
-                                        <!-- Кнопка вызова визуального каталога -->
                                         <button type="button" class="btn-open-modal-catalog" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap;">🖼️ Выбрать из каталога</button>
                                     </div>
-                                    <!-- Скрытый инпут с ID товара для отправки на сервер -->
                                     <input type="hidden" name="product_id[]" class="product-id-hidden" required>
                                 </div>
                                 <div class="field-wrapper qty-field" style="flex: 0 0 100px;">
@@ -783,25 +935,21 @@
                                     <input type="number" name="quantity[]" value="1" min="1" required class="form-control-styled">
                                 </div>
                             </div>
-                            
-                            <!-- Кнопка удаления строки -->
                             <button type="button" class="btn-remove-row" title="Удалить позицию" style="display: none;">✕</button>
                         </div>
                     </div>
             
-                    <!-- Кнопка добавления новой строки -->
                     <button type="button" id="add-row-btn" class="btn-add-row">
                         <span>+</span> Добавить еще позицию
                     </button>
             
-                    <!-- Кнопка отправки заявки -->
                     <button type="submit" class="btn-submit-order">
                         🚀 Отправить заявку в работу
                     </button>
                 </form>
             </div>
 
-            <!-- МОДАЛЬНОЕ ОКНО ВИЗУАЛЬНОГО КАТАЛОГА -->
+            <!-- МОДАЛЬНОЕ ОКНО С КАТЕГОРИЯМИ И КАРТОЧКАМИ -->
             <div id="catalogModal" class="modal-overlay" style="display: none;">
                 <div class="modal-content-box">
                     <div class="modal-header">
@@ -809,21 +957,22 @@
                         <button type="button" class="modal-close-btn" id="closeModalBtn">✕</button>
                     </div>
                     
-                    <!-- Поиск внутри модального окна для быстрой фильтрации картинок -->
-                    <div style="margin-bottom: 15px;">
-                        <input type="text" id="modalSearchInput" class="form-control-styled" placeholder="🔍 Быстрый фильтр по названию в каталоге..." autocomplete="off">
+                    <!-- Панель категорий и поиска -->
+                    <div class="catalog-controls">
+                        <input type="text" id="modalSearchInput" class="form-control-styled" placeholder="🔍 Поиск по названию или артикулу..." autocomplete="off">
+                        <!-- Горизонтальные вкладки категорий (генерируются динамически) -->
+                        <div class="categories-tabs" id="categoriesTabs">
+                            <button type="button" class="cat-tab active" data-category="all">Все товары</button>
+                        </div>
                     </div>
 
-                    <!-- Сетка товаров с картинками -->
-                    <div class="modal-products-grid" id="modalProductsGrid">
-                        <!-- Заполняется динамически через JS из базы -->
-                    </div>
+                    <!-- Сетка товаров -->
+                    <div class="modal-products-grid" id="modalProductsGrid"></div>
                 </div>
             </div>
 
-            <!-- Скрипты управления каталогом и модальным окном -->
             <script>
-                // Полный массив товаров из базы (включая фото и описание)
+                // Массив товаров (ожидаем, что p[6] — это категория, если нет — будет "Общая")
                 const ALL_PRODUCTS_FULL = [
                     {% for p in products %}
                     { 
@@ -832,34 +981,61 @@
                         description: "{{ p[2] if p[2] else 'Описание отсутствует' }}", 
                         price: "{{ p[3] }}", 
                         stock: "{{ p[4] }}", 
-                        image: "{{ p[5] if p[5] else 'https://via.placeholder.com/150?text=VoRtex' }}" 
+                        image: "{{ p[5] if p[5] else '' }}",
+                        category: "{{ p[6] if p[6] and p[6]|length > 0 else 'Общие комплектующие' }}"
                     },
                     {% endfor %}
                 ];
 
-                let activeRowForSelection = null; // Какая строка сейчас выбирает товар
+                let activeRowForSelection = null;
+                let currentCategory = 'all';
 
-                // Функция отрисовки сетки товаров в модалке
+                // Инициализация категорий
+                function initCategories() {
+                    const categoriesSet = new Set();
+                    ALL_PRODUCTS_FULL.forEach(p => categoriesSet.add(p.category));
+                    
+                    const tabsContainer = document.getElementById('categoriesTabs');
+                    tabsContainer.innerHTML = '<button type="button" class="cat-tab active" data-category="all">Все товары</button>';
+                    
+                    categoriesSet.forEach(cat => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'cat-tab';
+                        btn.setAttribute('data-category', cat);
+                        btn.textContent = cat;
+                        tabsContainer.appendChild(btn);
+                    });
+                }
+
+                // Отрисовка сетки товаров
                 function renderModalGrid(filterText = '') {
                     const grid = document.getElementById('modalProductsGrid');
                     grid.innerHTML = '';
 
                     const query = filterText.toLowerCase().trim();
-                    const filtered = ALL_PRODUCTS_FULL.filter(p => 
-                        p.title.toLowerCase().includes(query) || p.description.toLowerCase().includes(query)
-                    );
+                    
+                    const filtered = ALL_PRODUCTS_FULL.filter(p => {
+                        const matchesCategory = (currentCategory === 'all' || p.category === currentCategory);
+                        const matchesQuery = p.title.toLowerCase().includes(query) || p.description.toLowerCase().includes(query);
+                        return matchesCategory && matchesQuery;
+                    });
 
                     if (filtered.length === 0) {
-                        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #64748b;">Ничего не найдено по вашему запросу</div>';
+                        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">Ничего не найдено в этой категории</div>';
                         return;
                     }
 
                     filtered.forEach(p => {
                         const card = document.createElement('div');
                         card.className = 'catalog-item-card';
+                        
+                        // Если картинка не задана или пустая, ставим заглушку
+                        const imgSrc = (p.image && p.image.trim() !== '') ? p.image : 'https://placehold.co/150x150?text=No+Photo';
+
                         card.innerHTML = `
                             <div class="catalog-item-img">
-                                <img src="${p.image}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/150?text=No+Photo'">
+                                <img src="${imgSrc}" alt="${p.title}" onerror="this.src='https://placehold.co/150x150?text=Error'">
                             </div>
                             <div class="catalog-item-info">
                                 <div class="catalog-item-title">${p.title}</div>
@@ -868,27 +1044,43 @@
                                     <span class="catalog-item-price">${p.price} тг</span>
                                     <span class="catalog-item-stock">Склад: ${p.stock} шт.</span>
                                 </div>
-                                <button type="button" class="btn-select-this-product" data-id="${p.id}" data-title="${p.title}">Выбрать</button>
+                                <button type="button" class="btn-select-this-product" data-id="${p.id}" data-title="${p.title}">Выбрать товар</button>
                             </div>
                         `;
                         grid.appendChild(card);
                     });
                 }
 
-                // Логика привязки к конкретной строке заказа
+                // Обработчики кликов
                 document.addEventListener('click', function(e) {
-                    // Открытие модального окна
+                    // Открытие модалки
                     if (e.target.classList.contains('btn-open-modal-catalog')) {
                         activeRowForSelection = e.target.closest('.order-row-card');
                         document.getElementById('catalogModal').style.display = 'flex';
                         document.getElementById('modalSearchInput').value = '';
+                        currentCategory = 'all';
+                        
+                        // Сбрасываем активную вкладку категории на "Все"
+                        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+                        const allTab = document.querySelector('.cat-tab[data-category="all"]');
+                        if (allTab) allTab.classList.add('active');
+
                         renderModalGrid();
                     }
 
-                    // Выбор конкретного товара из модалки
-                    if (e.target.classList.contains('btn-select-this-product')) {
-                        const prodId = e.target.getAttribute('data-id');
-                        const prodTitle = e.target.getAttribute('data-title');
+                    // Переключение категорий в модалке
+                    if (e.target.classList.contains('cat-tab')) {
+                        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        currentCategory = e.target.getAttribute('data-category');
+                        renderModalGrid(document.getElementById('modalSearchInput').value);
+                    }
+
+                    // ВЫБОР ТОВАРА ИЗ КАРТОЧКИ (Клик по кнопке или самой карточке)
+                    const selectBtn = e.target.closest('.btn-select-this-product');
+                    if (selectBtn) {
+                        const prodId = selectBtn.getAttribute('data-id');
+                        const prodTitle = selectBtn.getAttribute('data-title');
 
                         if (activeRowForSelection) {
                             activeRowForSelection.querySelector('.selected-product-display').value = prodTitle;
@@ -907,23 +1099,21 @@
                     if (e.target === this) this.style.display = 'none';
                 });
 
-                // Фильтрация в модалке при вводе
+                // Поиск внутри модалки
                 document.getElementById('modalSearchInput').addEventListener('input', function() {
                     renderModalGrid(this.value);
                 });
 
-                // Добавление новой строки в форму заказа
+                // Добавление новой строки в форму
                 document.getElementById('add-row-btn').addEventListener('click', function() {
                     const container = document.getElementById('order-items-container');
                     const firstRow = container.querySelector('.order-row-card');
                     const newRow = firstRow.cloneNode(true);
                     
-                    // Очищаем данные в новой строке
                     newRow.querySelector('.selected-product-display').value = '';
                     newRow.querySelector('.product-id-hidden').value = '';
                     newRow.querySelector('input[type="number"]').value = '1';
                     
-                    // Показываем кнопку удаления
                     const removeBtn = newRow.querySelector('.btn-remove-row');
                     removeBtn.style.display = 'flex';
                     removeBtn.addEventListener('click', function() {
@@ -931,6 +1121,11 @@
                     });
                     
                     container.appendChild(newRow);
+                });
+
+                // Инициализация при загрузке страницы
+                document.addEventListener('DOMContentLoaded', function() {
+                    initCategories();
                 });
             </script>
             {% endif %}
