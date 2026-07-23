@@ -69,12 +69,13 @@
         </div>
 
         <!-- Товары со списком и галочками -->
+        <!-- Товары со списком и галочками -->
         <div class="section">
             <h3>📦 Товары в заявке (сборка / проверка)</h3>
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 50px; text-align: center;">Сборка</th>
+                        <th style="width: 70px; text-align: center;">Сборка</th>
                         <th>Наименование товара</th>
                         <th>Количество</th>
                         <th>Цена</th>
@@ -84,17 +85,19 @@
                     {% for item in items %}
                     <tr>
                         <td style="text-align: center;">
-                            <form action="{{ url_for('update_request_item_check', req_id=req[0], item_id=item[0]) }}" method="POST">
-                                <input type="checkbox" name="is_checked" {% if item[4] %}checked{% endif %} onchange="this.form.submit()" style="transform: scale(1.3); cursor: pointer;">
+                            <form action="{{ url_for('update_request_item_check', req_id=req[0], item_id=item[0]) }}" method="POST" style="margin: 0; background: none;">
+                                <input type="checkbox" name="is_checked" {% if item[4] %}checked{% endif %} onchange="this.form.submit()" style="transform: scale(1.4); cursor: pointer;">
                             </form>
                         </td>
-                        <td style="{% if item[4] %}text-decoration: line-through; color: #95a5a6;{% endif %}">{{ item[1] }}</td>
+                        <td style="{% if item[4] %}text-decoration: line-through; color: #95a5a6;{% endif %} font-weight: 500;">
+                            {{ item[1] }}
+                        </td>
                         <td>{{ item[2] }} шт.</td>
                         <td>{{ item[3] }} тг</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" style="text-align: center; color: #95a5a6; padding: 15px;">Товары к этой заявке не прикреплены</td>
+                        <td colspan="4" style="text-align: center; color: #95a5a6; padding: 20px;">К этой заявке еще не привязаны товары из каталога</td>
                     </tr>
                     {% endfor %}
                 </tbody>
