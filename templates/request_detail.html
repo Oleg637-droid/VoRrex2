@@ -71,31 +71,44 @@
         <!-- Товары со списком и галочками -->
         <!-- Товары со списком и галочками -->
         <div class="section">
-            <h3>📦 Товары в заявке (сборка / проверка)</h3>
-            <table>
+            <h3>📦Товары в заявке:</h3>
+            <table style="width: 100%; border-collapse: collapse; background: #2c3e50; margin-bottom: 20px;">
                 <thead>
-                    <tr>
-                        <th style="width: 70px; text-align: center;">Сборка</th>
-                        <th>Наименование товара</th>
-                        <th>Количество</th>
-                        <th>Цена</th>
+                    <tr style="background: #2980b9;">
+                        <th style="padding: 10px;">Собран</th>
+                        <th style="padding: 10px;">Наименование</th>
+                        <th style="padding: 10px;">Запрошено</th>
+                        <th style="padding: 10px;">Фактический остаток</th>
+                        <th style="padding: 10px;">Цена</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td style="padding: 10px;">{{ item[1] }}</td>
-                        <td style="padding: 10px;">{{ item[2] }} шт.</td>
+                        <!-- Галочка готовности -->
                         <td style="padding: 10px; text-align: center;">
-                            <form action="{{ url_for('update_fact_qty', req_id=req[0], item_id=item[0]) }}" method="POST" style="margin: 0; padding: 0; background: none;">
-                                <input type="checkbox" name="is_collected" value="1" {% if item[5] %}checked{% endif %} onchange="this.form.submit()" style="width: 20px; height: 20px; cursor: pointer;">
+                            <form action="{{ url_for('update_request_item', req_id=req[0], item_id=item[0]) }}" method="POST" style="margin: 0; padding: 0; background: none;">
+                                <!-- Передаем текущее значение fact_quantity, чтобы оно не стиралось при клике на галочку -->
+                                <input type="hidden" name="fact_quantity" value="{{ item[5] if item[5] is not none else '' }}">
+                                <input type="checkbox" name="is_checked" value="1" {% if item[4] %}checked{% endif %} onchange="this.form.submit()" style="width: 20px; height: 20px; cursor: pointer;">
                             </form>
                         </td>
+                        
+                        <td style="padding: 10px;">{{ item[1] }}</td>
+                        <td style="padding: 10px;">{{ item[2] }} шт.</td>
+                        
+                        <!-- Поле ввода фактического количества -->
+                        <td style="padding: 10px;">
+                            <form action="{{ url_for('update_request_item', req_id=req[0], item_id=item[0]) }}" method="POST" style="display: flex; gap: 10px; margin: 0; padding: 0; background: none;">
+                                <!-- Сохраняем текущее состояние чекбокса при отправке числа -->
+                                {% if item[4] %}<input type="hidden" name="is_checked" value="1">{% endif %}
+                                
+                                <input type="number" name="fact_quantity" value="{{ item[5] if item[5] is not none else '' }}" placeholder="Факт" style="width: 80px; padding: 5px; border-radius: 4px; border: 1px solid #4e6d8c; background: #34495e; color: white;">
+                                <button type="submit" style="padding: 5px 10px; font-size: 0.8rem; background: #1abc9c; border: none; border-radius: 4px; cursor: pointer; color: white;">Ок</button>
+                            </form>
+                        </td>
+                        
                         <td style="padding: 10px;">{{ item[3] }} ₸</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: #95a5a6; padding: 20px;">К этой заявке еще не привязаны товары из каталога</td>
                     </tr>
                     {% endfor %}
                 </tbody>
