@@ -138,8 +138,31 @@
                 text-align: center !important;
                 gap: 10px !important;
             }
+
+            /* Делаем шапку компактнее на телефонах */
+            header {
+                position: relative !important; /* Убираем липкую шапку, чтобы она не съедала полезный экран при скролле */
+            }
+            .header-inner {
+                padding: 10px 0 !important;
+                gap: 8px !important;
+            }
+            .logo {
+                font-size: 1.2rem !important; /* Чуть уменьшаем логотип */
+            }
+            nav {
+                flex-direction: row !important; /* Оставляем ссылки в ряд, чтобы экономить высоту */
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+                gap: 15px !important;
+                font-size: 0.9rem !important;
+            }
+            .header-contacts {
+                display: none !important; /* Полностью скрываем адрес на мобилках, оставляя только номер телефона в шапке или убирая его, если нужно */
+            }
         }
-        
+
+          
     </style>
 </head>
 <body>
