@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>VoRtex — Производство и поставка РВД</title>
     <style>
         /* Общие стили */
@@ -75,6 +76,73 @@
         /* Подвал сайта (Footer) */
         footer { background: #0f172a; color: #64748b; padding: 40px 0; font-size: 0.9rem; border-top: 1px solid #1e293b; }
         .footer-inner { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Базовые адаптивные правила для мобильных экранов (шириной до 768px) */
+        @media screen and (max-width: 768px) {
+            /* Общие отступы и контейнеры */
+            body {
+                padding: 10px !important;
+                font-size: 14px !important;
+            }
+            
+            .container, .content, main {
+                width: 100% !important;
+                padding: 5px !important;
+                margin: 0 !important;
+            }
+        
+            /* Таблицы: делаем прокручиваемыми по горизонтали, чтобы они не ломали экран */
+            table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        
+            th, td {
+                padding: 8px 6px !important;
+                font-size: 13px !important;
+            }
+        
+            /* Формы и кнопки: делаем их удобными для нажатия пальцем */
+            input[type="text"], 
+            input[type="password"], 
+            input[type="number"], 
+            select, 
+            textarea {
+                width: 100% !important;
+                box-sizing: border-box;
+                font-size: 16px !important; /* На iOS меньше 16px вызывает автозум, это важно */
+                padding: 10px !important;
+                margin-bottom: 8px;
+            }
+        
+            button, input[type="submit"], .btn {
+                width: 100% !important;
+                padding: 12px !important;
+                font-size: 15px !important;
+                margin-top: 5px;
+            }
+        
+            /* Навигация / Меню */
+            nav, .menu, .navbar {
+                display: flex;
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+        
+            nav a, .menu a {
+                padding: 10px !important;
+                text-align: center;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+        
+            /* Карточки заказов / блоков */
+            div[style*="background"] {
+                padding: 10px !important;
+                margin-bottom: 10px !important;
+            }
+        }
     </style>
 </head>
 <body>
