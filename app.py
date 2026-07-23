@@ -518,15 +518,24 @@ def view_request_detail(req_id):
     return redirect(url_for('home'))
 
 @app.route('/admin/request/<int:req_id>/update_item/<int:item_id>', methods=['POST'])
-def update_request_item_check(req_id, item_id):
+def update_request_item(req_id, item_id):
     if 'user' in session and session['role'] == 'admin':
-        is_checked = 'is_checked' in request.form
+        fact_qty_str = request.form.get('fact_quantity')
+        fact_quantity = int(fact_qty_str) if fact_qty_str and fact_qty_str.strip() != '' else None
+        
+        # Чекбокс передает '1' если отмечен, или вообще не передается, если снят
+        is_checked = True if request.form.get('is_checked') == '1' else False
+        
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE request_items SET is_checked = %s WHERE id = %s AND request_id = %s", (is_checked, item_id, req_id))
+        cursor.execute(
+            "UPDATE request_items SET fact_quantity = %s, is_checked = %s WHERE id = %s AND request_id = %s",
+            (fact_quantity, is_checked, item_id, req_id)
+        )
         conn.commit()
         cursor.close()
         conn.close()
+        
     return redirect(url_for('view_request_detail', req_id=req_id))
 
 @app.route('/admin/request/<int:req_id>/upload_file', methods=['POST'])
