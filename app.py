@@ -278,32 +278,54 @@ def client_dashboard():
 @app.route('/client/order_parts', methods=['POST'])
 def order_parts():
     if 'user' in session and session['role'] == 'client':
-        # Получаем списки выбранных товаров и их количество из формы
         product_ids = request.form.getlist('product_id[]')
         quantities = request.form.getlist('quantity[]')
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # Получаем id текущего пользователя из базы
+        cursor.execute("SELECT id FROM users WHERE email = %s", (session['user'],))
+        user_row = cursor.fetchone()
+        user_id = user_row[0] if user_row else None
+
         order_details = []
+        valid_items = []
+        total_price = 0
+
+        # Сначала собираем и валидируем все выбранные товары
         for p_id, qty in zip(product_ids, quantities):
             if p_id and int(qty) > 0:
-                # Узнаем название товара из базы по его ID
-                cursor.execute("SELECT title FROM products WHERE id = %s", (p_id,))
+                q = int(qty)
+                cursor.execute("SELECT title, price FROM products WHERE id = %s", (p_id,))
                 prod = cursor.fetchone()
                 if prod:
-                    order_details.append(f"{prod[0]} — {qty} шт.")
-        
-        if order_details:
+                    prod_title, prod_price = prod[0], prod[1]
+                    item_total = prod_price * q
+                    total_price += item_total
+                    order_details.append(f"{prod_title} — {q} шт.")
+                    valid_items.append((p_id, prod_title, q, prod_price))
+
+        if valid_items:
             items_str = ", ".join(order_details)
             user_name = session['name']
             user_email = session['user']
             full_message = f"[Заказ комплектующих] Состав: {items_str} (Клиент: {user_name}, {user_email})"
             
+            # 1. Создаем саму заявку в таблице messages с общей суммой и email
             cursor.execute(
-                "INSERT INTO messages (name, phone, message) VALUES (%s, %s, %s)",
-                (user_name, "Из кабинета (комплектующие)", full_message)
+                "INSERT INTO messages (name, phone, message, user_id, email, total_price, status) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                (user_name, "Из кабинета (комплектующие)", full_message, user_id, user_email, total_price, 'Новая')
             )
+            request_id = cursor.fetchone()[0]
+
+            # 2. Сохраняем каждую позицию отдельно в таблицу request_items для отображения на странице детализации
+            for p_id, prod_title, q, prod_price in valid_items:
+                cursor.execute(
+                    "INSERT INTO request_items (request_id, product_id, product_name, quantity, price, is_checked) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (request_id, p_id, prod_title, q, prod_price, False)
+                )
+
             conn.commit()
             
         cursor.close()
