@@ -529,6 +529,26 @@ def delete_request_file(req_id, file_id):
         conn.close()
     return redirect(url_for('view_request_detail', req_id=req_id))
 
+@app.route('/admin/request/<int:req_id>/update_fact_qty/<int:item_id>', methods=['POST'])
+def update_fact_qty(req_id, item_id):
+    if 'user' in session and session['role'] == 'admin':
+        fact_qty_str = request.form.get('fact_quantity')
+        
+        # Если поле пустое, сохраняем NULL (ничего не изменилось / не проверялось)
+        fact_quantity = int(fact_qty_str) if fact_qty_str and fact_qty_str.strip() != '' else None
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE request_items SET fact_quantity = %s WHERE id = %s AND request_id = %s",
+            (fact_quantity, item_id, req_id)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+    return redirect(url_for('view_request_detail', req_id=req_id))
+
 @app.route('/logout')
 def logout():
     session.clear()
