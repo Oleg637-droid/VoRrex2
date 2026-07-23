@@ -49,7 +49,7 @@
             <h3>👤 Данные клиента и связь</h3>
             <div class="contact-box">
                 <div><strong>Имя:</strong> {{ req[1] }}</div>
-                <div><strong>Телефон:</strong> {{ req[2] if req[2] else 'Не указан' }}</div>
+                <div><strong>Телефон:</strong> {{ req[5] if req[5] else 'Не указан' }}</div>
                 <div><strong>Email:</strong> {{ req[6] if req[6] else 'Не указан' }}</div>
                 <div style="margin-left: auto; display: flex; gap: 10px;">
                     {% if req[2] %}
