@@ -880,22 +880,28 @@
             --------------------------- */
         
             .modal-content-box{
-                height:95vh;
-                padding:12px;
+                width:100%;
+                height:100%;
+                max-width:none;
+                max-height:none;
+                border-radius:0;
+                padding:15px;
             }
         
             .modal-products-grid{
-                grid-template-columns:1fr;
+                grid-template-columns:repeat(2,1fr);
+                gap:10px;
             }
         
             .catalog-item-card{
-                flex-direction:row;
-                height:110px;
+                flex-direction:column;
+                height:auto;
+                min-height:340px;
             }
         
             .catalog-item-img{
-                width:110px;
-                height:100%;
+                width:100%;
+                height:180px;
                 flex-shrink:0;
             }
         
@@ -904,7 +910,20 @@
             }
         
             .catalog-item-desc{
-                display:none;
+                display:block;
+                font-size:13px;
+                margin-bottom:10px;
+            }
+            .btn-select-this-product,
+            .btn-submit-order,
+            .btn-add-row{
+                min-height:48px;
+                font-size:15px;
+            }
+            input,
+            select,
+            textarea{
+                font-size:16px;
             }
         
         }
@@ -915,6 +934,15 @@
                 color .2s ease,
                 border-color .2s ease;
         }
+        @media (max-width:480px){
+
+            .modal-products-grid{
+                grid-template-columns:1fr;
+            }
+        
+        }
+        
+        
     </style>
 </head>
 <body>
