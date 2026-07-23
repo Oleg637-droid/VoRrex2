@@ -162,7 +162,12 @@
                                 <th style="padding: 12px;">Клиент / Телефон</th>
                                 <th style="padding: 12px;">Сообщение</th>
                                 <th style="padding: 12px;">Статус</th>
-                                <th style="padding: 12px; text-align: center;">Действия</th>
+                                <td style="padding: 12px; text-align: center;">
+                                    <a href="{{ url_for('view_request_detail', req_id=m[0]) }}" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: #2980b9; text-decoration: none; display: inline-block; margin-right: 5px;">Открыть</a>
+                                    <form action="{{ url_for('delete_request', req_id=m[0]) }}" method="POST" style="display: inline-block; margin: 0; padding: 0; background: none;" onsubmit="return confirm('Удалить эту заявку?');">
+                                        <button type="submit" style="background: #e74c3c; padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; color: white; border: none; cursor: pointer;">Удалить</button>
+                                    </form>
+                                </td>
                             </tr>
                         </thead>
                         <tbody>
