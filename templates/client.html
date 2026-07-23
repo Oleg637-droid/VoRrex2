@@ -116,10 +116,26 @@
 
             <!-- Вкладка 2: Заказы -->
             {% if tab == 'orders' %}
-            <div class="card-box">
-                <h2>📦 История заказов</h2>
-                <p style="color: #64748b;">Здесь будет отображаться список ваших прошлых и текущих заказов.</p>
-            </div>
+                {% for msg in client_messages %}
+                    <div class="order-card">
+                        <p>Заявка от {{ msg[2] }} — Статус: <strong>{{ msg[3] }}</strong></p>
+                        <ul>
+                            {% for item in order_items_dict.get(msg[0], []) %}
+                                <li>
+                                    {{ item.title }} — 
+                                    {% if item.fact_quantity is not none and item.fact_quantity != item.quantity %}
+                                        <!-- Если количество изменено админом -->
+                                        <del style="color: red;">{{ item.quantity }} шт.</del> 
+                                        <strong style="color: green;">{{ item.fact_quantity }} шт.</strong>
+                                    {% else>
+                                        <!-- Если количество не менялось -->
+                                        {{ item.quantity }} шт.
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
             {% endif %}
 
             
