@@ -397,42 +397,67 @@
 
             
             <!-- Вкладка 3: Заказ комплектующих из каталога -->
+            <!-- Вкладка 3: Заказ комплектующих из каталога -->
             {% if tab == 'calc' %}
             <div class="card-box">
-                <h2>📦 Заказ комплектующих (со склада)</h2>
-                <p style="color: #64748b; margin-bottom: 20px;">Выберите нужные позиции из базы данных, укажите количество и отправьте заявку в работу.</p>
+                <h2>🛠️ Новая заявка на комплектующие</h2>
+                <p style="color: #64748b; margin-bottom: 25px; font-size: 0.95rem;">Выберите нужные позиции со склада, укажите необходимое количество и отправьте запрос в работу.</p>
                 
-                <form action="{{ url_for('order_parts') }}" method="POST" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                <form action="{{ url_for('order_parts') }}" method="POST" class="order-form-container">
                     
-                    <div id="order-items-container" style="display: flex; flex-direction: column; gap: 10px;">
-                        <div class="order-row" style="display: flex; gap: 10px; align-items: center;">
-                            <select name="product_id[]" required style="flex: 3; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                                <option value="">-- Выберите товар из базы --</option>
-                                {% for p in products %}
-                                <option value="{{ p[0] }}">{{ p[1] }} (Склад: {{ p[4] }}) — {{ p[3] }} тг</option>
-                                {% endfor %}
-                            </select>
-                            <input type="number" name="quantity[]" value="1" min="1" required style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" placeholder="Кол-во">
+                    <!-- Контейнер для строк товаров -->
+                    <div id="order-items-container" class="order-rows-list">
+                        <div class="order-row-card">
+                            <div class="row-fields">
+                                <div class="field-wrapper select-field">
+                                    <label>Наименование товара / позиции</label>
+                                    <select name="product_id[]" required class="form-control-styled">
+                                        <option value="">-- Выберите товар из базы --</option>
+                                        {% for p in products %}
+                                        <option value="{{ p[0] }}">{{ p[1] }} (Доступно: {{ p[4] }} шт.) — {{ p[3] }} тг</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field-wrapper qty-field">
+                                    <label>Кол-во</label>
+                                    <input type="number" name="quantity[]" value="1" min="1" required class="form-control-styled">
+                                </div>
+                            </div>
+                            <!-- Кнопка удаления строки (скрыта для первой строки) -->
+                            <button type="button" class="btn-remove-row" title="Удалить позицию" style="display: none;">✕</button>
                         </div>
                     </div>
             
-                    <button type="button" id="add-row-btn" style="background: #f1f5f9; color: #3b82f6; border: 1px dashed #3b82f6; padding: 8px; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                        + Добавить еще позицию
+                    <!-- Кнопка добавления новой строки -->
+                    <button type="button" id="add-row-btn" class="btn-add-row">
+                        <span>+</span> Добавить еще позицию
                     </button>
             
-                    <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px;">
-                        Отправить заказ комплектующих
+                    <!-- Кнопка отправки заявки -->
+                    <button type="submit" class="btn-submit-order">
+                        🚀 Отправить заявку в работу
                     </button>
                 </form>
             </div>
             
-            <!-- Простой скрипт для добавления новых строк товаров в форму -->
+            <!-- Продвинутый скрипт для динамического добавления/удаления строк -->
             <script>
                 document.getElementById('add-row-btn').addEventListener('click', function() {
                     const container = document.getElementById('order-items-container');
-                    const firstRow = container.querySelector('.order-row');
+                    const firstRow = container.querySelector('.order-row-card');
                     const newRow = firstRow.cloneNode(true);
-                    newRow.querySelector('input').value = '1';
+                    
+                    // Очищаем значение в новом селекторе и сбрасываем количество на 1
+                    newRow.querySelector('select').value = '';
+                    newRow.querySelector('input[type="number"]').value = '1';
+                    
+                    // Показываем кнопку удаления для новых строк
+                    const removeBtn = newRow.querySelector('.btn-remove-row');
+                    removeBtn.style.display = 'flex';
+                    removeBtn.addEventListener('click', function() {
+                        newRow.remove();
+                    });
+                    
                     container.appendChild(newRow);
                 });
             </script>
