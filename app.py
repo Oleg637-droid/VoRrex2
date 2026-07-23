@@ -279,8 +279,9 @@ def client_dashboard():
         client_messages = cursor.fetchall()
 
         # Получаем товары по всем заявкам этого пользователя
+        # Получаем товары по всем заявкам этого пользователя
         cursor.execute('''
-            ri.request_id, ri.product_name, ri.quantity, ri.fact_quantity 
+            SELECT ri.request_id, ri.product_name, ri.quantity, ri.fact_quantity 
             FROM request_items ri
             JOIN messages m ON ri.request_id = m.id
             WHERE m.user_id = %s
