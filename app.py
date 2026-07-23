@@ -404,13 +404,8 @@ def view_request_detail(req_id):
         # Получаем данные заявки
         cursor.execute("SELECT id, name, phone, message, created_at, status, email, total_price FROM messages WHERE id = %s", (req_id,))
         req = cursor.fetchone()
-        
-        if not req:
-            cursor.close()
-            conn.close()
-            return redirect(url_for('admin_dashboard', tab='requests'))
             
-        # Получаем привязанные товары
+        # Получаем привязанные товары (ID, название, количество, цена, статус галочки)
         cursor.execute("SELECT id, product_name, quantity, price, is_checked FROM request_items WHERE request_id = %s", (req_id,))
         items = cursor.fetchall()
         
