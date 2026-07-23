@@ -42,87 +42,91 @@
         .card-box h2 { font-size: 1.5rem; color: #0f172a; margin-bottom: 15px; }
 
         @media screen and (max-width: 768px) {
-            /* 1. Адаптация шапки сайта */
-            .header-inner {
+            /* 1. Превращаем макет личного кабинета в колонку */
+            .dashboard-container {
                 flex-direction: column !important;
-                height: auto !important;
-                padding: 15px 0 !important;
-                gap: 10px !important;
             }
-            nav {
-                flex-direction: column !important;
-                gap: 10px !important;
+        
+            /* 2. Компактная верхняя шапка личного кабинета */
+            header {
+                padding: 10px 15px !important;
+            }
+            .logo {
+                font-size: 1.1rem !important;
+            }
+        
+            /* 3. Превращаем сайдбар в горизонтальную панель навигации */
+            .sidebar {
+                width: 100% !important;
+                padding: 15px !important;
+                border-right: none !important;
+                border-bottom: 1px solid #e2e8f0;
+            }
+        
+            /* Скрываем аватарку и email на мобилках, оставляем только имя */
+            .user-profile {
+                display: flex !important;
                 align-items: center !important;
+                justify-content: flex-start !important;
+                gap: 12px !important;
+                padding-bottom: 12px !important;
+                margin-bottom: 12px !important;
+                text-align: left !important;
             }
-            .header-contacts {
-                text-align: center !important;
+            .avatar {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 1.1rem !important;
+                margin: 0 !important;
+            }
+            .user-email {
+                display: none !important; /* Убираем почту, чтобы не загромождать */
+            }
+            .user-name {
+                font-size: 1rem !important;
+            }
+        
+            /* Делаем меню навигации скроллящимся в строку */
+            .nav-menu {
+                flex-direction: row !important;
+                overflow-x: auto !important;
+                gap: 8px !important;
+                padding-bottom: 5px !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            .nav-item {
+                white-space: nowrap !important;
+                padding: 8px 12px !important;
                 font-size: 0.85rem !important;
             }
         
-            /* 2. Адаптация главного баннера (Hero) */
-            .hero {
-                padding: 40px 0 !important;
-            }
-            .hero-inner {
-                flex-direction: column !important;
-                gap: 20px !important;
-            }
-            .hero-text h1 {
-                font-size: 1.8rem !important;
-                text-align: center;
-            }
-            .hero-text p {
-                font-size: 1rem !important;
-                text-align: center;
-            }
-        
-            /* 3. Форма входа на главном баннере */
-            .hero-form-box {
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 20px !important;
-                box-shadow: none !important;
-            }
-        
-            /* 4. Сетка преимуществ */
-            .features-grid {
-                grid-template-columns: 1fr !important;
-                gap: 15px !important;
-            }
-            .section-title {
-                font-size: 1.5rem !important;
-                margin-bottom: 25px !important;
-            }
-        
-            /* 5. Подвал */
-            .footer-inner {
-                flex-direction: column !important;
-                text-align: center !important;
-                gap: 10px !important;
-            }
-
-            /* Делаем шапку компактнее на телефонах */
-            header {
-                position: relative !important; /* Убираем липкую шапку, чтобы она не съедала полезный экран при скролле */
-            }
-            .header-inner {
-                padding: 10px 0 !important;
-                gap: 8px !important;
-            }
-            .logo {
-                font-size: 1.2rem !important; /* Чуть уменьшаем логотип */
-            }
-            nav {
-                flex-direction: row !important; /* Оставляем ссылки в ряд, чтобы экономить высоту */
-                flex-wrap: wrap !important;
-                justify-content: center !important;
-                gap: 15px !important;
+            /* Кнопка выхода под меню в ряд */
+            .btn-logout {
+                margin-top: 10px !important;
+                padding: 10px !important;
                 font-size: 0.9rem !important;
             }
-            .header-contacts {
-                display: none !important; /* Полностью скрываем адрес на мобилках, оставляя только номер телефона в шапке или убирая его, если нужно */
+        
+            /* 4. Основной контент */
+            .content-area {
+                padding: 15px !important;
+            }
+            .card-box {
+                padding: 20px 15px !important;
+            }
+        
+            /* Адаптация формы заказа комплектующих внутри ЛК */
+            .order-row {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+            .order-row select, 
+            .order-row input {
+                width: 100% !important;
+                flex: none !important;
             }
         }
+        
     </style>
 </head>
 <body>
