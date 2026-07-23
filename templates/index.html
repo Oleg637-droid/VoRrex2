@@ -78,71 +78,79 @@
         .footer-inner { display: flex; justify-content: space-between; align-items: center; }
 
         /* Базовые адаптивные правила для мобильных экранов (шириной до 768px) */
+        
         @media screen and (max-width: 768px) {
-            /* Общие отступы и контейнеры */
-            body {
+            /* Сбрасываем жесткие ширины и контейнеры */
+            body, .panel, .card-box {
+                padding: 8px !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+        
+            /* Навигация друг под другом */
+            .admin-nav {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 5px !important;
+            }
+            .admin-nav a {
+                text-align: center !important;
+                width: 100% !important;
+            }
+        
+            /* Превращаем таблицы в нормальные вертикальные блоки, чтобы они не ломали экран */
+            table, thead, tbody, th, td, tr {
+                display: block !important;
+                width: 100% !important;
+            }
+            thead { display: none !important; }
+            
+            tr {
+                background: #34495e !important;
+                margin-bottom: 12px !important;
                 padding: 10px !important;
-                font-size: 14px !important;
+                border-radius: 8px !important;
+                border: 1px solid #4e6d8c !important;
             }
             
-            .container, .content, main {
+            td {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 6px 0 !important;
+                border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+                text-align: right !important;
+            }
+            td:last-child { border-bottom: none !important; }
+        
+            /* Поля ввода и кнопки на всю ширину для удобства */
+            input, select, textarea, button {
                 width: 100% !important;
-                padding: 5px !important;
-                margin: 0 !important;
+                box-sizing: border-box !important;
+                font-size: 16px !important; /* Убирает автозум на iPhone */
+                margin-top: 4px !important;
+                margin-bottom: 4px !important;
             }
         
-            /* Таблицы: делаем прокручиваемыми по горизонтали, чтобы они не ломали экран */
-            table {
-                display: block;
-                width: 100%;
-                overflow-x: auto;
-                white-space: nowrap;
+            /* Исправление форм внутри ячеек таблиц (например, для ввода фактического количества) */
+            td form {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 5px !important;
+                width: auto !important;
+                justify-content: flex-end !important;
             }
-        
-            th, td {
-                padding: 8px 6px !important;
-                font-size: 13px !important;
+            td form input[type="number"] {
+                width: 80px !important;
             }
-        
-            /* Формы и кнопки: делаем их удобными для нажатия пальцем */
-            input[type="text"], 
-            input[type="password"], 
-            input[type="number"], 
-            select, 
-            textarea {
-                width: 100% !important;
-                box-sizing: border-box;
-                font-size: 16px !important; /* На iOS меньше 16px вызывает автозум, это важно */
-                padding: 10px !important;
-                margin-bottom: 8px;
-            }
-        
-            button, input[type="submit"], .btn {
-                width: 100% !important;
-                padding: 12px !important;
-                font-size: 15px !important;
-                margin-top: 5px;
-            }
-        
-            /* Навигация / Меню */
-            nav, .menu, .navbar {
-                display: flex;
-                flex-direction: column !important;
-                align-items: stretch !important;
-            }
-        
-            nav a, .menu a {
-                padding: 10px !important;
-                text-align: center;
-                border-bottom: 1px solid rgba(255,255,255,0.1);
-            }
-        
-            /* Карточки заказов / блоков */
-            div[style*="background"] {
-                padding: 10px !important;
-                margin-bottom: 10px !important;
+            td form button {
+                width: auto !important;
+                padding: 5px 10px !important;
             }
         }
+        
     </style>
 </head>
 <body>
