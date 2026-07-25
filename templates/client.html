@@ -1214,7 +1214,7 @@
             <style>
                 .catalog-item-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
                 .catalog-item-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
-                .catalog-item-img img { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
+                .catalog-item-img img { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #f1f5f9; }
                 .catalog-item-title { font-weight: 600; font-size: 0.95rem; color: #1e293b; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
                 .catalog-item-desc { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
                 .catalog-item-footer { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; }
@@ -1235,7 +1235,7 @@
                             description: "{{ p[2] if p[2] else 'Описание отсутствует' }}", 
                             price: parseFloat("{{ p[3] }}") || 0, 
                             stock: parseInt("{{ p[4] }}") || 0, 
-                            image: "{{ p[5] if p[5] else '' }}",
+                            image: "{{ p[5] | string | trim if p[5] is not none else '' }}",
                             category: "{{ p[6] if p[6] and p[6]|length > 0 else 'Общие комплектующие' }}"
                         },
                         {% endfor %}
@@ -1283,11 +1283,14 @@
                         filtered.forEach(p => {
                             const card = document.createElement('div');
                             card.className = 'catalog-item-card';
-                            const imgSrc = (p.image && p.image.trim() !== '') ? p.image : 'https://placehold.co/150x150?text=No+Photo';
+                            
+                            // Проверяем наличие ссылки на картинку
+                            const hasImage = p.image && p.image !== 'None' && p.image !== '';
+                            const imgSrc = hasImage ? p.image : 'https://placehold.co/200x140?text=No+Photo';
             
                             card.innerHTML = `
                                 <div class="catalog-item-img">
-                                    <img src="${imgSrc}" alt="${p.title}" onerror="this.src='https://placehold.co/150x150?text=Error'">
+                                    <img src="${imgSrc}" alt="${p.title}" onerror="this.onerror=null; this.src='https://placehold.co/200x140?text=Error';">
                                 </div>
                                 <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                                     <div>
@@ -1320,12 +1323,13 @@
                         if (!product) return;
             
                         const modalContent = document.getElementById('modalDetailContent');
-                        const imgSrc = (product.image && product.image.trim() !== '') ? product.image : 'https://placehold.co/300x200?text=No+Photo';
+                        const hasImage = product.image && product.image !== 'None' && product.image !== '';
+                        const imgSrc = hasImage ? product.image : 'https://placehold.co/300x200?text=No+Photo';
                         const currentQtyInCart = cart[product.id] ? cart[product.id].quantity : 1;
             
                         modalContent.innerHTML = `
                             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                                <img src="${imgSrc}" alt="${product.title}" style="width: 220px; height: 220px; object-fit: cover; border-radius: 8px;" onerror="this.src='https://placehold.co/200x200?text=Error'">
+                                <img src="${imgSrc}" alt="${product.title}" style="width: 220px; height: 220px; object-fit: cover; border-radius: 8px; background: #f1f5f9;" onerror="this.onerror=null; this.src='https://placehold.co/220x220?text=Error';">
                                 <div style="flex: 1; min-width: 220px;">
                                     <span style="background: #e2e8f0; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #475569;">${product.category}</span>
                                     <h2 style="margin: 10px 0; font-size: 1.3rem; color: #1e293b;">${product.title}</h2>
@@ -1376,7 +1380,6 @@
                         let totalPrice = 0;
                         const keys = Object.keys(cart);
             
-                        // Очищаем контейнер, сохраняя структуру
                         container.innerHTML = '';
             
                         if (keys.length === 0) {
@@ -1423,21 +1426,20 @@
                         submitBtn.style.cursor = 'pointer';
                     }
             
-                    // Безопасная инициализация после полной отрисовки DOM
-                    document.addEventListener('DOMContentLoaded', () => {
-                        initCategories();
-                        renderCatalogGrid();
-                        renderCart();
-                    });
-            
-                    // На случай если скрипт вставился через AJAX / динамически и DOMContentLoaded уже прошел
+                    // Инициализация
                     if (document.readyState === 'complete' || document.readyState === 'interactive') {
                         initCategories();
                         renderCatalogGrid();
                         renderCart();
+                    } else {
+                        document.addEventListener('DOMContentLoaded', () => {
+                            initCategories();
+                            renderCatalogGrid();
+                            renderCart();
+                        });
                     }
             
-                    // События интерфейса
+                    // Глобальные события интерфейса
                     document.addEventListener('click', function(e) {
                         if (e.target.classList.contains('btn-quick-add')) {
                             const id = e.target.getAttribute('data-id');
