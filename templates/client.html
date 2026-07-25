@@ -1185,8 +1185,8 @@
                         </h3>
             
                         <form action="{{ url_for('order_parts') }}" method="POST" id="checkoutForm">
-                            <!-- Контейнер выбранных товаров (скрытые инпуты улетают на бэк) -->
-                            <div id="cartItemsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; display: flex; flexDirection: column; gap: 10px;">
+                            <!-- Контейнер выбранных товаров -->
+                            <div id="cartItemsContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
                                 <div id="emptyCartMessage" style="text-align: center; color: #94a3b8; padding: 30px 0; font-size: 0.9rem;">
                                     Корзина пуста. Выберите товары из каталога слева.
                                 </div>
@@ -1219,7 +1219,6 @@
             </div>
             
             <style>
-                /* Стили для карточек и элементов */
                 .catalog-item-card {
                     background: white;
                     border: 1px solid #e2e8f0;
@@ -1318,7 +1317,6 @@
                     {% endfor %}
                 ];
             
-                // Хранилище корзины: ключ — id товара, значение — объект { id, title, price, quantity }
                 let cart = {};
                 let currentCategory = 'all';
             
@@ -1328,6 +1326,8 @@
                     ALL_PRODUCTS_FULL.forEach(p => categoriesSet.add(p.category));
                     
                     const tabsContainer = document.getElementById('categoriesTabs');
+                    if (!tabsContainer) return;
+                    
                     tabsContainer.innerHTML = '<button type="button" class="cat-tab active" data-category="all">Все товары</button>';
                     
                     categoriesSet.forEach(cat => {
@@ -1343,6 +1343,7 @@
                 // Рендер каталога товаров
                 function renderCatalogGrid(filterText = '') {
                     const grid = document.getElementById('mainProductsGrid');
+                    if (!grid) return;
                     grid.innerHTML = '';
             
                     const query = filterText.toLowerCase().trim();
@@ -1385,7 +1386,6 @@
                             </div>
                         `;
             
-                        // Клик по карточке (кроме кнопок) открывает модалку с деталями
                         card.addEventListener('click', (e) => {
                             if (!e.target.closest('button')) {
                                 openDetailModal(p.id);
@@ -1455,6 +1455,7 @@
                     const submitBtn = document.getElementById('submitOrderBtn');
                     const emptyMsg = document.getElementById('emptyCartMessage');
             
+                    if (!container) return;
                     container.innerHTML = '';
                     let totalCount = 0;
                     let totalPrice = 0;
@@ -1478,7 +1479,6 @@
                         totalCount += item.quantity;
                         totalPrice += item.price * item.quantity;
             
-                        // Создаем визуальный элемент корзины
                         const row = document.createElement('div');
                         row.className = 'cart-item-row';
                         row.innerHTML = `
@@ -1490,7 +1490,6 @@
                                 <input type="number" value="${item.quantity}" min="1" class="cart-item-qty-input" data-id="${item.id}" style="width: 50px; text-align: center; font-size: 0.85rem; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;">
                                 <button type="button" class="cart-item-remove" data-id="${item.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem;" title="Удалить">✕</button>
                             </div>
-                            <!-- Скрытые поля для отправки формы POST -->
                             <input type="hidden" name="product_id[]" value="${item.id}">
                             <input type="hidden" name="quantity[]" value="${item.quantity}">
                         `;
@@ -1506,27 +1505,23 @@
             
                 // Глобальные обработчики событий
                 document.addEventListener('click', function(e) {
-                    // Клик по кнопке "+" быстрого добавления в карточке каталога
                     if (e.target.classList.contains('btn-quick-add')) {
                         const id = e.target.getAttribute('data-id');
                         const currentQty = cart[id] ? cart[id].quantity + 1 : 1;
                         updateCartItem(id, currentQty);
                     }
             
-                    // Клик "Подробнее" в карточке каталога
                     if (e.target.classList.contains('btn-detail')) {
                         const id = e.target.getAttribute('data-id');
                         openDetailModal(id);
                     }
             
-                    // Клик удаления товара из корзины
                     if (e.target.classList.contains('cart-item-remove')) {
                         const id = e.target.getAttribute('data-id');
                         delete cart[id];
                         renderCart();
                     }
             
-                    // Клик переключения категорий
                     if (e.target.classList.contains('cat-tab')) {
                         document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
                         e.target.classList.add('active');
@@ -1534,7 +1529,6 @@
                         renderCatalogGrid(document.getElementById('catalogSearchInput').value);
                     }
             
-                    // Клик добавления в корзину из модального окна
                     if (e.target.id === 'modalAddToCartBtn') {
                         const id = e.target.getAttribute('data-id');
                         const qty = document.getElementById('modalProductQty').value;
@@ -1543,7 +1537,6 @@
                     }
                 });
             
-                // Изменение количества прямо в инпуте корзины
                 document.addEventListener('input', function(e) {
                     if (e.target.classList.contains('cart-item-qty-input')) {
                         const id = e.target.getAttribute('data-id');
@@ -1551,24 +1544,30 @@
                     }
                 });
             
-                // Закрытие модального окна деталей
-                document.getElementById('closeDetailModalBtn').addEventListener('click', () => {
-                    document.getElementById('productDetailModal').style.display = 'none';
-                });
-                document.getElementById('productDetailModal').addEventListener('click', (e) => {
-                    if (e.target === e.currentTarget) e.currentTarget.style.display = 'none';
-                });
+                const closeBtn = document.getElementById('closeDetailModalBtn');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        document.getElementById('productDetailModal').style.display = 'none';
+                    });
+                }
             
-                // Поиск по каталогу
-                document.getElementById('catalogSearchInput').addEventListener('input', function() {
-                    renderCatalogGrid(this.value);
-                });
+                const modalOverlay = document.getElementById('productDetailModal');
+                if (modalOverlay) {
+                    modalOverlay.addEventListener('click', (e) => {
+                        if (e.target === e.currentTarget) e.currentTarget.style.display = 'none';
+                    });
+                }
             
-                // Инициализация при загрузке
-                document.addEventListener('DOMContentLoaded', function() {
-                    initCategories();
-                    renderCatalogGrid();
-                });
+                const searchInput = document.getElementById('catalogSearchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        renderCatalogGrid(this.value);
+                    });
+                }
+            
+                // Сразу инициализируем каталог при загрузке скрипта
+                initCategories();
+                renderCatalogGrid();
             </script>
             {% endif %}
 
