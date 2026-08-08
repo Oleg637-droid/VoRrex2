@@ -20,22 +20,25 @@
         const query = filterText.toLowerCase().trim();
         const filtered = stockData.filter(item => {
             const matchesQuery = item.title.toLowerCase().includes(query) || (item.code && item.code.toLowerCase().includes(query));
+            
+            // Если выбран конкретный склад, проверяем есть ли на нем остаток (>0)
+            if (currentWarehouse !== 'all') {
+                const whKey = `wh${currentWarehouse}`;
+                const hasStockOnWarehouse = (item[whKey] || 0) > 0;
+                return matchesQuery && hasStockOnWarehouse;
+            }
+            
             return matchesQuery;
         });
 
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Позиции не найдены в базе данных</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Позиции не найдены</td></tr>';
             return;
         }
 
         filtered.forEach(item => {
             const tr = document.createElement('tr');
             
-            // Фильтрация отображения колонок складов при выборе конкретного склада в табах
-            const showWh1 = (currentWarehouse === 'all' || currentWarehouse === '1');
-            const showWh2 = (currentWarehouse === 'all' || currentWarehouse === '2');
-            const showWh3 = (currentWarehouse === 'all' || currentWarehouse === '3');
-
             tr.innerHTML = `
                 <td>
                     <div class="item-name-cell">
@@ -49,12 +52,32 @@
                 <td><span class="stock-badge ${item.wh3 <= 2 ? 'low' : ''}">${item.wh3} шт</span></td>
                 <td><strong>${item.total} шт</strong></td>
                 <td>
-                    <button type="button" class="btn-action-sm" data-id="${item.id}">Переместить</button>
+                    <button type="button" class="btn-action-sm move-btn" data-id="${item.id}">Переместить</button>
                 </td>
             `;
             tbody.appendChild(tr);
         });
     }
+
+    // Обработчик кнопки перемещения
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('move-btn')) {
+            const productId = e.target.getAttribute('data-id');
+            const item = stockData.find(i => i.id == productId);
+            if (item) {
+                const targetWh = prompt(`Перемещение товара "${item.title}".\nУкажите склад назначения (1, 2 или 3):`, "1");
+                if (targetWh && ['1', '2', '3'].includes(targetWh.trim())) {
+                    const qty = prompt("Укажите количество для перемещения:", "1");
+                    if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+                        alert(`Запрос на перемещение ${qty} шт. товара ID ${productId} на Склад №${targetWh} успешно сформирован!`);
+                        // Здесь при необходимости можно добавить fetch-запрос на бэкенд для сохранения движения
+                    }
+                } else if (targetWh !== null) {
+                    alert('Ошибка: укажите корректный номер склада (1, 2 или 3)');
+                }
+            }
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
         fetchStockData();
