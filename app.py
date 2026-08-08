@@ -655,5 +655,36 @@ def api_warehouses_stock():
         print(f"Ошибка при получении остатков: {e}")
         return jsonify([])
 
+@app.route('/api/products/add', methods=['POST'])
+def api_add_product():
+    try:
+        data = request.json
+        title = data.get('title')
+        category = data.get('category', 'Общая')
+        price = data.get('price', 0)
+        warehouse = data.get('warehouse', 'Склад 1')
+        description = data.get('description', '')
+        image_url = data.get('image_url', '')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO products (title, category, price, description, image_url, warehouse)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id;
+            """,
+            (title, category, price, description, image_url, warehouse)
+        )
+        new_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"success": True, "id": new_id, "message": "Товар успешно добавлен"})
+    except Exception as e:
+        print(f"Ошибка при добавлении товара: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
