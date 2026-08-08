@@ -4,26 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Warehouse — Складской учет</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="app-container">
-        <!-- Шапка / Навигация -->
         <header class="app-header">
             <div class="logo-area">
-                <a href="/database" class="back-btn" title="На главную хаба">←</a>
+                <a href="/database.html" class="back-btn" title="На главную хаба">←</a>
                 <span class="logo-icon">🏢</span>
                 <h1>Складской<span>Учет</span></h1>
             </div>
-            <div class="header-badge">Контроль остатков по складам</div>
+            <div class="header-badge">База данных PostgreSQL</div>
         </header>
 
-        <!-- Основная панель -->
         <main class="warehouse-workspace">
-            
-            <!-- Панель фильтров и переключения складов -->
             <div class="control-panel">
                 <div class="warehouse-tabs" id="warehouseTabs">
                     <button type="button" class="wh-tab active" data-warehouse="all">Все склады</button>
@@ -34,11 +30,10 @@
                 
                 <div class="search-box wh-search">
                     <span class="search-ico">🔍</span>
-                    <input type="text" id="stockSearchInput" placeholder="Поиск по артикулу, названию или ячейке..." autocomplete="off">
+                    <input type="text" id="stockSearchInput" placeholder="Поиск по артикулу или названию..." autocomplete="off">
                 </div>
             </div>
 
-            <!-- Таблица / Карточки остатков -->
             <div class="stock-table-card">
                 <div class="table-responsive">
                     <table class="modern-table">
@@ -54,40 +49,14 @@
                             </tr>
                         </thead>
                         <tbody id="stockTableBody">
-                            <!-- Данные подгружаются скриптом или бэкендом -->
-                            <tr>
-                                <td>
-                                    <div class="item-name-cell"><strong>РВД 4SH 32мм</strong><span>Код: HOSE-4SH-32</span></div>
-                                </td>
-                                <td>Рукава</td>
-                                <td><span class="stock-badge">12 шт (Ряд 3)</span></td>
-                                <td><span class="stock-badge">8 шт (Ряд 1)</span></td>
-                                <td><span class="stock-badge low">2 шт</span></td>
-                                <td><strong>22 шт</strong></td>
-                                <td>
-                                    <button type="button" class="btn-action-sm">Переместить</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="item-name-cell"><strong>Фитинг DKOL М20x1.5</strong><span>Код: FIT-DKOL-20</span></div>
-                                </td>
-                                <td>Фитинги</td>
-                                <td><span class="stock-badge">120 шт (Яч. A4)</span></td>
-                                <td><span class="stock-badge">60 шт (Яч. B2)</span></td>
-                                <td><span class="stock-badge">0 шт</span></td>
-                                <td><strong>180 шт</strong></td>
-                                <td>
-                                    <button type="button" class="btn-action-sm">Переместить</button>
-                                </td>
-                            </tr>
+                            <!-- Данные загружаются динамически из БД через JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </main>
     </div>
 
+    <script src="/static/warehouses_stock.js"></script>
 </body>
 </html>
