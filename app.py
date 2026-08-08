@@ -597,6 +597,10 @@ def database_hub():
     # Здесь можно добавить проверку авторизации (например, только для админа)
     return render_template('database.html')
 
+@app.route('/section/warehouses-stock')
+def warehouses_stock():
+    return render_template('warehouses_stock.html')
+
 @app.route('/logout')
 def logout():
     session.clear()
