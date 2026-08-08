@@ -9,29 +9,41 @@
 </head>
 <body>
 
-    <form id="addProductForm">
-        <div class="mb-3">
-            <label class="form-label">Наименование товара / артикул</label>
-            <input type="text" class="form-control" id="productTitle" required>
+    <!-- Модальное окно добавления товара -->
+    <div class="modal-overlay" id="addProductModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Добавить новый товар</h3>
+                <button type="button" class="modal-close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label class="form-label" for="productTitle">Наименование товара / артикул</label>
+                    <input type="text" class="form-control" id="productTitle" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="productCategory">Категория</label>
+                    <input type="text" class="form-control" id="productCategory" value="Гидравлика/Фитинги" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="productPrice">Цена</label>
+                    <input type="number" step="0.01" class="form-control" id="productPrice" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="productWarehouse">Склад / Расположение</label>
+                    <select class="form-select" id="productWarehouse">
+                        <option value="Склад 1">Основной склад (Склад 1)</option>
+                        <option value="Склад 2">Филиал (Склад 2)</option>
+                        <option value="Склад 3">Резерв (Склад 3)</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelModalBtn">Отмена</button>
+                    <button type="submit" class="btn-primary">Сохранить товар</button>
+                </div>
+            </form>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Категория</label>
-            <input type="text" class="form-control" id="productCategory" value="Гидравлика/Фитинги">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Цена</label>
-            <input type="number" step="0.01" class="form-control" id="productPrice" value="0">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Склад / Расположение</label>
-            <select class="form-select" id="productWarehouse">
-                <option value="Склад 1">Основной склад (Склад 1)</option>
-                <option value="Склад 2">Филиал (Склад 2)</option>
-                <option value="Склад 3">Резерв (Склад 3)</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-success">Сохранить товар</button>
-    </form>
+    </div>
 
     <div class="app-container">
         <header class="app-header">
@@ -52,9 +64,14 @@
                     <button type="button" class="wh-tab" data-warehouse="3">Склад №3 (Резерв)</button>
                 </div>
                 
-                <div class="search-box wh-search">
-                    <span class="search-ico">🔍</span>
-                    <input type="text" id="stockSearchInput" placeholder="Поиск по артикулу или названию..." autocomplete="off">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button type="button" class="btn-add-product" id="openModalBtn">
+                        <span>＋</span> Добавить товар
+                    </button>
+                    <div class="search-box wh-search">
+                        <span class="search-ico">🔍</span>
+                        <input type="text" id="stockSearchInput" placeholder="Поиск по артикулу или названию..." autocomplete="off">
+                    </div>
                 </div>
             </div>
 
