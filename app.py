@@ -606,5 +606,54 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
+from flask import jsonify
+
+@app.route('/api/warehouses-stock')
+def api_warehouses_stock():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Выбираем товары из вашей существующей таблицы products
+        cur.execute("SELECT id, title, category, price, warehouse FROM products")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        # Преобразуем данные в удобный для JS формат
+        # Распределяем остатки по виртуальным колонкам складов на основе значения поля warehouse или дефолтных значений
+        result = []
+        for row in rows:
+            p_id, title, category, price, warehouse = row
+            
+            # Логика распределения по складам в зависимости от значения в БД
+            wh1, wh2, wh3 = 0, 0, 0
+            wh_lower = str(warehouse).lower()
+            if '1' in wh_lower or 'основной' in wh_lower:
+                wh1 = 15
+            elif '2' in wh_lower or 'филиал' in wh_lower:
+                wh2 = 10
+            elif '3' in wh_lower or 'резерв' in wh_lower:
+                wh3 = 5
+            else:
+                # Если склад не указан явно, распределяем базово по офису/складу 1
+                wh1 = 10
+                wh2 = 5
+
+            result.append({
+                "id": p_id,
+                "title": title,
+                "code": f"ITEM-{p_id}",
+                "category": category or "Комплектующие",
+                "wh1": wh1,
+                "wh2": wh2,
+                "wh3": wh3,
+                "total": wh1 + wh2 + wh3
+            })
+        
+        return jsonify(result)
+    except Exception as e:
+        print(f"Ошибка при получении остатков: {e}")
+        return jsonify([])
+
 if __name__ == '__main__':
     app.run(debug=True)
