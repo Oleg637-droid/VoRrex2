@@ -163,3 +163,24 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', handleAddProduct);
     }
 });
+
+// Управление модальным окном добавления товара
+const modalOverlay = document.getElementById('addProductModal');
+const openModalBtn = document.getElementById('openModalBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const cancelModalBtn = document.getElementById('cancelModalBtn');
+
+if (openModalBtn && modalOverlay) {
+    openModalBtn.addEventListener('click', () => modalOverlay.classList.add('active'));
+}
+if (closeModalBtn && modalOverlay) {
+    closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
+}
+if (cancelModalBtn && modalOverlay) {
+    cancelModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
+}
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+    });
+}
