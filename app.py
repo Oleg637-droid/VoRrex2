@@ -157,6 +157,8 @@ def home():
 
 from flask import render_template, request
 
+
+
 @app.route('/catalog')
 def catalog():
     category = request.args.get('category') # Получаем категорию из ссылки, если есть
@@ -586,6 +588,12 @@ def update_fact_qty(req_id, item_id):
         conn.close()
         
     return redirect(url_for('view_request_detail', req_id=req_id))
+
+@app.route('/database')
+def database():
+    return render_template('database.html')
+
+from flask import render_template, request
 
 @app.route('/logout')
 def logout():
