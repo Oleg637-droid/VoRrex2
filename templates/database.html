@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Warehouse — Управление базой данных</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Шапка -->
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="logo-icon">⚡</span>
+                <h1>Nexus<span>Database</span></h1>
+            </div>
+            <div class="header-badge">Управление складом и учет</div>
+        </header>
+
+        <!-- Главное меню / Категории базы данных -->
+        <main class="database-hub">
+            <div class="hub-intro">
+                <h2>Главная панель базы данных</h2>
+                <p>Выберите нужный раздел для управления номенклатурой, складами, контрагентами или просмотра аналитических отчетов.</p>
+            </div>
+
+            <div class="hub-grid">
+                
+                <!-- 1. Товары по оптовой цене -->
+                <a href="/section/wholesale-products" class="hub-card">
+                    <div class="hub-icon">📦</div>
+                    <div class="hub-content">
+                        <h3>Оптовый прайс</h3>
+                        <p>Управление номенклатурой и ценами для оптовых покупателей</p>
+                    </div>
+                </a>
+
+                <!-- 2. Товары по розничной цене -->
+                <a href="/section/retail-products" class="hub-card">
+                    <div class="hub-icon">🏷️</div>
+                    <div class="hub-content">
+                        <h3>Розница и витрина</h3>
+                        <p>Учет товаров по розничным ценам и их доступность</p>
+                    </div>
+                </a>
+
+                <!-- 3. Контрагенты и клиенты-оптовики -->
+                <a href="/section/counterparties" class="hub-card">
+                    <div class="hub-icon">🤝</div>
+                    <div class="hub-content">
+                        <h3>Контрагенты и оптовики</h3>
+                        <p>База данных клиентов, партнеров, реквизиты и условия</p>
+                    </div>
+                </a>
+
+                <!-- 4. Учет товаров по складам -->
+                <a href="/section/warehouses-stock" class="hub-card">
+                    <div class="hub-icon">🏢</div>
+                    <div class="hub-content">
+                        <h3>Складской учет</h3>
+                        <p>Контроль остатков: где что лежит по трем складам</p>
+                    </div>
+                </a>
+
+                <!-- 5. Отчеты по продажам оптовиков -->
+                <a href="/section/reports-wholesale" class="hub-card">
+                    <div class="hub-icon">📊</div>
+                    <div class="hub-content">
+                        <h3>Отчеты (Опт)</h3>
+                        <p>История и аналитика отгрузок крупным и мелким оптом</p>
+                    </div>
+                </a>
+
+                <!-- 6. Отчеты продаж по рознице -->
+                <a href="/section/reports-retail" class="hub-card">
+                    <div class="hub-icon">📈</div>
+                    <div class="hub-content">
+                        <h3>Отчеты (Розница)</h3>
+                        <p>Детализация розничных реализаций по точкам</p>
+                    </div>
+                </a>
+
+                <!-- 7. Отчеты за день (итоговая сумма) -->
+                <a href="/section/daily-summary" class="hub-card">
+                    <div class="hub-icon">📅</div>
+                    <div class="hub-content">
+                        <h3>Итоги за день</h3>
+                        <p>Сводный финансовый отчет за текущие сутки с общей суммой</p>
+                    </div>
+                </a>
+
+                <!-- 8. Информация по продажам и поступлениям -->
+                <a href="/section/inflows-outflows" class="hub-card">
+                    <div class="hub-icon">🔄</div>
+                    <div class="hub-content">
+                        <h3>Приход и расход</h3>
+                        <p>Движение комплектующих, поступления от поставщиков</p>
+                    </div>
+                </a>
+
+                <!-- 9. Галерея -->
+                <a href="/section/gallery" class="hub-card">
+                    <div class="hub-icon">🖼️</div>
+                    <div class="hub-content">
+                        <h3>Медиа-галерея</h3>
+                        <p>Фотографии узлов, оборудования, чертежи и каталоги</p>
+                    </div>
+                </a>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>
