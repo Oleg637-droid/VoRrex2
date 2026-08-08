@@ -29,11 +29,24 @@
             width: 300px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
+        .nav-grid {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px auto 20px;
+            padding: 10px;
+            max-width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="panel">
         <h1>⚙️ Панель управления: {{ name }}</h1>
+
+        <div class="nav-grid">
+            <a href="/database.html" class="nav-card">💰<br>База-Данных</a>
+        </div>
         
         <div class="admin-nav">
             <a href="{{ url_for('admin_dashboard', tab='sklad') }}" class="{{ 'active' if tab == 'sklad' }}">Складской учет</a>
