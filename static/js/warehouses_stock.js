@@ -83,3 +83,60 @@
         }
     });
 })();
+
+// Функция отправки нового товара на сервер
+async function handleAddProduct(event) {
+    event.preventDefault();
+
+    const productData = {
+        title: document.getElementById('productTitle').value,
+        category: document.getElementById('productCategory').value,
+        price: parseFloat(document.getElementById('productPrice').value) || 0,
+        warehouse: document.getElementById('productWarehouse').value,
+        description: document.getElementById('productDescription')?.value || '',
+        image_url: document.getElementById('productImage')?.value || ''
+    };
+
+    try {
+        const response = await fetch('/api/products/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productData)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            // Закрываем модальное окно (если используется Bootstrap или кастомное)
+            const modalElement = document.getElementById('addProductModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) modal.hide();
+            }
+            
+            // Очищаем форму
+            event.target.reset();
+
+            // Перезагружаем таблицу остатков
+            if (typeof loadStockData === 'function') {
+                loadStockData();
+            } else {
+                location.reload();
+            }
+        } else {
+            alert('Ошибка при добавлении: ' + (result.error || 'Неизвестная ошибка'));
+        }
+    } catch (err) {
+        console.error('Ошибка запроса:', err);
+        alert('Не удалось связаться с сервером');
+    }
+}
+
+// Привязка к форме добавления (убедитесь, что у вашей формы id="addProductForm")
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('addProductForm');
+    if (form) {
+        form.addEventListener('submit', handleAddProduct);
+    }
+});
