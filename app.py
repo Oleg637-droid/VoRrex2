@@ -589,11 +589,13 @@ def update_fact_qty(req_id, item_id):
         
     return redirect(url_for('view_request_detail', req_id=req_id))
 
-@app.route('/database')
-def database():
-    return render_template('database.html')
 
-from flask import render_template, request
+
+@app.route('/database')
+@app.route('/database.html')
+def database_hub():
+    # Здесь можно добавить проверку авторизации (например, только для админа)
+    return render_template('database.html')
 
 @app.route('/logout')
 def logout():
